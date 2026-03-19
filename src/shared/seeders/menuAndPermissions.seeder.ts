@@ -39,6 +39,13 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
       route: '/panel',
       order: 1,
     },
+    {
+      name: 'reapplications.title',
+      description: 'Solicitudes de reaplicación',
+      icon: 'ic_file',
+      route: '/reapplications',
+      order: 2,
+    },
   ]
 
   private readonly items: ItemSeed[] = [
@@ -56,14 +63,28 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
       moduleName: 'panel.title',
       order: 2,
     },
+    {
+      name: 'reapplications.items.list',
+      icon: 'ic_file',
+      route: '/reapplications/list',
+      moduleName: 'reapplications.title',
+      order: 1,
+    },
   ]
 
   private readonly permissionNames = ['view', 'create', 'edit', 'delete']
 
   private readonly rolePermissions: RolePermissionSeed[] = [
+    // user — solo su dashboard
     {
       roleKey: 'user',
       itemName: 'panel.items.dashboard',
+      permissions: ['view'],
+    },
+    // viewer — solo ve solicitudes de reaplicación
+    {
+      roleKey: 'viewer',
+      itemName: 'reapplications.items.list',
       permissions: ['view'],
     },
   ]
@@ -82,7 +103,7 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
   }
 
   async seed() {
-    this.logger.log('Seeding menu and permissions...')
+    this.logger.log('Sembrando menú y permisos...')
 
     await this.seedModules()
     await this.seedItems()
@@ -90,34 +111,28 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
     await this.seedAdminPermissions()
     await this.seedRolePermissions()
 
-    this.logger.log('Menu and permissions seeding completed')
+    this.logger.log('Menú y permisos completados')
   }
 
   private async seedModules() {
     for (const mod of this.modules) {
-      const existing = await this.moduleRepository.findOneBy({
-        name: mod.name,
-      })
+      const existing = await this.moduleRepository.findOneBy({ name: mod.name })
       if (!existing) {
         await this.moduleRepository.save(this.moduleRepository.create(mod))
-        this.logger.log(`Created module: ${mod.name}`)
+        this.logger.log(`Módulo creado: ${mod.name}`)
       }
     }
   }
 
   private async seedItems() {
     for (const item of this.items) {
-      const existing = await this.itemRepository.findOneBy({
-        name: item.name,
-      })
+      const existing = await this.itemRepository.findOneBy({ name: item.name })
       if (!existing) {
         const module = await this.moduleRepository.findOneBy({
           name: item.moduleName,
         })
         if (!module) {
-          this.logger.warn(
-            `Module not found for item ${item.name}: ${item.moduleName}`,
-          )
+          this.logger.warn(`Módulo no encontrado para item ${item.name}: ${item.moduleName}`)
           continue
         }
         await this.itemRepository.save(
@@ -129,7 +144,7 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
             order: item.order,
           }),
         )
-        this.logger.log(`Created item: ${item.name}`)
+        this.logger.log(`Item creado: ${item.name}`)
       }
     }
   }
@@ -141,7 +156,7 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
         await this.permissionRepository.save(
           this.permissionRepository.create({ name }),
         )
-        this.logger.log(`Created permission: ${name}`)
+        this.logger.log(`Permiso creado: ${name}`)
       }
     }
   }
@@ -172,7 +187,7 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
       }
     }
     this.logger.log(
-      `Admin permissions assigned (${allItems.length} items x ${allPermissions.length} permissions)`,
+      `Permisos admin asignados (${allItems.length} items x ${allPermissions.length} permisos)`,
     )
   }
 
@@ -182,16 +197,12 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
       const item = await this.itemRepository.findOneBy({ name: rp.itemName })
 
       if (!role || !item) {
-        this.logger.warn(
-          `Skipping: role=${rp.roleKey} item=${rp.itemName} (not found)`,
-        )
+        this.logger.warn(`Omitido: role=${rp.roleKey} item=${rp.itemName} (no encontrado)`)
         continue
       }
 
       for (const permName of rp.permissions) {
-        const permission = await this.permissionRepository.findOneBy({
-          name: permName,
-        })
+        const permission = await this.permissionRepository.findOneBy({ name: permName })
         if (!permission) continue
 
         const existing = await this.rolItemPermissionRepository.findOneBy({
@@ -209,9 +220,7 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
           )
         }
       }
-      this.logger.log(
-        `Assigned ${rp.permissions.join(', ')} to ${rp.roleKey} on ${rp.itemName}`,
-      )
+      this.logger.log(`Permisos asignados: ${rp.roleKey} → ${rp.itemName}`)
     }
   }
 }

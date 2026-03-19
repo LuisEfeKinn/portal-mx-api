@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { AnnouncementModule } from './announcement/announcement.module'
 import { AuthModule } from './auth/auth.module'
 import { config } from './config'
 import { SharedModule } from './shared/shared.module'
@@ -29,6 +30,7 @@ import { UserModule } from './user/user.module'
     SharedModule.forRoot(),
     AuthModule,
     UserModule,
+    AnnouncementModule,
   ],
 })
 export class AppModule {}

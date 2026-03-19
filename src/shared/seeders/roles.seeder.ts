@@ -20,7 +20,12 @@ export class RolesSeeder implements OnModuleInit {
     {
       name: 'Usuario',
       key: 'user',
-      description: 'Usuario estándar',
+      description: 'Aplicante del proceso de examen',
+    },
+    {
+      name: 'Viewer',
+      key: 'viewer',
+      description: 'Solo puede ver solicitudes de reaplicación',
     },
   ]
 
