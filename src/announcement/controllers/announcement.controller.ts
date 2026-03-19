@@ -16,6 +16,12 @@ export class AnnouncementController {
     return this.announcementUseCase.findAll()
   }
 
+  @Get('milestones')
+  @ApiOperation({ summary: 'Listar todos los hitos del sistema' })
+  getMilestones() {
+    return this.announcementUseCase.getMilestones()
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtener convocatoria por ID' })
   findById(@Param('id', ParseIntPipe) id: number) {

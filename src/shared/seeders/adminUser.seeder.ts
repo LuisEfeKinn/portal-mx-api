@@ -35,7 +35,9 @@ export class AdminUserSeeder implements OnModuleInit {
 
     const adminRole = await this.rolRepository.findOneBy({ key: 'admin' })
     if (!adminRole) {
-      this.logger.warn('Rol admin no encontrado — ejecuta primero el seeder de roles')
+      this.logger.warn(
+        'Rol admin no encontrado — ejecuta primero el seeder de roles',
+      )
       return
     }
 
@@ -56,6 +58,8 @@ export class AdminUserSeeder implements OnModuleInit {
     await this.userRoleRepository.save(userRole)
 
     this.logger.log(`Usuario admin creado: ${email} / ${password}`)
-    this.logger.warn('Cambia la contraseña del admin después del primer inicio de sesión')
+    this.logger.warn(
+      'Cambia la contraseña del admin después del primer inicio de sesión',
+    )
   }
 }

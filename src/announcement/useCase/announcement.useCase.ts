@@ -9,6 +9,10 @@ export class AnnouncementUseCase {
     return await this.announcementService.findAll()
   }
 
+  getMilestones() {
+    return this.announcementService.getMilestones()
+  }
+
   async findById(id: number) {
     return await this.announcementService.findById(id)
   }
