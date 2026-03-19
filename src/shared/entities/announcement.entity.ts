@@ -14,11 +14,23 @@ export class AnnouncementEntity {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number
 
+  @Column({ type: 'varchar', length: 100, unique: true })
+  key: string
+
   @Column({ type: 'varchar', length: 255 })
   name: string
 
   @Column({ type: 'text', nullable: true })
   description?: string
+
+  @Column({ type: 'date' })
+  examStartDate: Date
+
+  @Column({ type: 'date', nullable: true })
+  examEndDate?: Date
+
+  @Column({ type: 'date' })
+  reapplicationDate: Date
 
   @Column({ type: 'boolean', default: true })
   isActive: boolean

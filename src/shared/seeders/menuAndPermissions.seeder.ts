@@ -33,40 +33,80 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
 
   private readonly modules: ModuleSeed[] = [
     {
-      name: 'panel.title',
-      description: 'Panel principal',
+      name: 'dashboard.title',
+      description: 'Dashboard principal',
       icon: 'ic_dashboard',
-      route: '/panel',
+      route: '/dashboard',
       order: 1,
+    },
+    {
+      name: 'users.title',
+      description: 'Gestión de usuarios',
+      icon: 'ic_users',
+      route: '/users',
+      order: 2,
+    },
+    {
+      name: 'applications.title',
+      description: 'Gestión de convocatorias',
+      icon: 'ic_calendar',
+      route: '/applications',
+      order: 3,
+    },
+    {
+      name: 'resources.title',
+      description: 'Gestión de recursos por hito',
+      icon: 'ic_folder',
+      route: '/resources',
+      order: 4,
     },
     {
       name: 'reapplications.title',
       description: 'Solicitudes de reaplicación',
       icon: 'ic_file',
       route: '/reapplications',
-      order: 2,
+      order: 5,
     },
   ]
 
   private readonly items: ItemSeed[] = [
+    // Dashboard
     {
-      name: 'panel.items.dashboard',
+      name: 'dashboard.items.home',
       icon: 'ic_dashboard',
-      route: '/panel/dashboard',
-      moduleName: 'panel.title',
+      route: '/dashboard',
+      moduleName: 'dashboard.title',
       order: 1,
     },
+    // Usuarios
     {
-      name: 'panel.items.users',
+      name: 'users.items.list',
       icon: 'ic_users',
-      route: '/panel/users',
-      moduleName: 'panel.title',
-      order: 2,
+      route: '/users',
+      moduleName: 'users.title',
+      order: 1,
     },
+    // Aplicaciones (convocatorias)
+    {
+      name: 'applications.items.list',
+      icon: 'ic_calendar',
+      route: '/applications',
+      moduleName: 'applications.title',
+      order: 1,
+    },
+    // Recursos
+    {
+      name: 'resources.items.list',
+      icon: 'ic_folder',
+      route: '/resources',
+      moduleName: 'resources.title',
+      order: 1,
+    },
+    // Solicitudes de reaplicación
     {
       name: 'reapplications.items.list',
       icon: 'ic_file',
-      route: '/reapplications/list',
+      route: '/reapplications',
       moduleName: 'reapplications.title',
       order: 1,
     },
@@ -74,14 +114,8 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
 
   private readonly permissionNames = ['view', 'create', 'edit', 'delete']
 
+  // Solo viewer — admin recibe todo en seedAdminPermissions
   private readonly rolePermissions: RolePermissionSeed[] = [
-    // user — solo su dashboard
-    {
-      roleKey: 'user',
-      itemName: 'panel.items.dashboard',
-      permissions: ['view'],
-    },
-    // viewer — solo ve solicitudes de reaplicación
     {
       roleKey: 'viewer',
       itemName: 'reapplications.items.list',
@@ -132,7 +166,9 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
           name: item.moduleName,
         })
         if (!module) {
-          this.logger.warn(`Módulo no encontrado para item ${item.name}: ${item.moduleName}`)
+          this.logger.warn(
+            `Módulo no encontrado para item ${item.name}: ${item.moduleName}`,
+          )
           continue
         }
         await this.itemRepository.save(
@@ -197,12 +233,16 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
       const item = await this.itemRepository.findOneBy({ name: rp.itemName })
 
       if (!role || !item) {
-        this.logger.warn(`Omitido: role=${rp.roleKey} item=${rp.itemName} (no encontrado)`)
+        this.logger.warn(
+          `Omitido: role=${rp.roleKey} item=${rp.itemName} (no encontrado)`,
+        )
         continue
       }
 
       for (const permName of rp.permissions) {
-        const permission = await this.permissionRepository.findOneBy({ name: permName })
+        const permission = await this.permissionRepository.findOneBy({
+          name: permName,
+        })
         if (!permission) continue
 
         const existing = await this.rolItemPermissionRepository.findOneBy({

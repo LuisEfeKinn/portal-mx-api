@@ -1,7 +1,4 @@
 import { Module } from '@nestjs/common'
-import { ConfigModule, ConfigService } from '@nestjs/config'
-import { JwtModule } from '@nestjs/jwt'
-import { PassportModule } from '@nestjs/passport'
 import { BlackListTokenRepository } from 'src/shared/repositories/blackListToken.repository'
 import { UserRepository } from 'src/shared/repositories/user.repository'
 import { MailsService } from 'src/shared/services/mails.service'
@@ -21,20 +18,7 @@ import { SignOutUseCase } from './useCase/signOut.useCase'
 import { SignUpUseCase } from './useCase/signUp.useCase'
 
 @Module({
-  imports: [
-    SharedModule.forRoot(),
-    ConfigModule.forRoot(),
-    JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get('jwt.secret'),
-        signOptions: { expiresIn: configService.get('jwt.expiresIn') },
-      }),
-    }),
-    PassportModule.register({
-      defaultStrategy: 'jwt',
-    }),
-  ],
+  imports: [SharedModule.forRoot()],
   controllers: [AuthController],
   providers: [
     JwtStrategy,

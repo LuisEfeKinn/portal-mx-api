@@ -10,7 +10,7 @@ export class AnnouncementService {
   async findAll() {
     return await this.announcementRepository.find({
       where: { isActive: true },
-      order: { createdAt: 'DESC' },
+      order: { examStartDate: 'ASC' },
     })
   }
 

@@ -1,9 +1,4 @@
 import { Module } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
-import { ConfigModule } from '@nestjs/config/dist/config.module'
-import { JwtModule } from '@nestjs/jwt'
-import { PassportModule } from '@nestjs/passport'
-import { DEFAULT_STRATEGY } from 'src/shared/constants/auth.constant'
 import { UserRepository } from 'src/shared/repositories/user.repository'
 import { PaginatedService } from 'src/shared/services/paginated.service'
 import { SharedModule } from 'src/shared/shared.module'
@@ -24,22 +19,7 @@ import { RoleUseCase } from './useCase/role.useCase'
 import { CrudUsersUseCase } from './useCase/user.useCase'
 
 @Module({
-  imports: [
-    SharedModule.forRoot(),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      global: true,
-      // eslint-disable-next-line require-await
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: configService.get<string>('JWT_EXPIRES_IN') },
-      }),
-      inject: [ConfigService],
-    }),
-    PassportModule.register({
-      defaultStrategy: DEFAULT_STRATEGY,
-    }),
-  ],
+  imports: [SharedModule.forRoot()],
   providers: [
     CrudUserService,
     InitDataService,
