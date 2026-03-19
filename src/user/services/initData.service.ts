@@ -53,7 +53,7 @@ export class InitDataService {
 
   private async buildMenuForRole(roleId: number): Promise<ModuleDto[]> {
     const permissions = await this.rolItemPermissionRepository.find({
-      where: { roleId: roleId },
+      where: { roleId: Number(roleId) },
       relations: ['item', 'item.module', 'permission'],
       order: {
         item: {

@@ -24,6 +24,7 @@ import { AnnouncementsSeeder } from './seeders/announcements.seeder'
 import { MenuAndPermissionsSeeder } from './seeders/menuAndPermissions.seeder'
 import { MilestonesSeeder } from './seeders/milestones.seeder'
 import { RolesSeeder } from './seeders/roles.seeder'
+import { TestUsersSeeder } from './seeders/testUsers.seeder'
 import { AuthService } from './services/auth.service'
 import { PasswordService } from './services/password.service'
 import { S3Service } from './services/s3.service'
@@ -54,9 +55,10 @@ export class SharedModule {
         // Roles
         RolRepository,
         RolesSeeder,
-        // Admin user
+        // Admin + test users
         UserRoleRepository,
         AdminUserSeeder,
+        TestUsersSeeder,
         // Menu & Permissions
         ItemRepository,
         ModuleRepository,

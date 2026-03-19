@@ -4,6 +4,7 @@ import { ItemRepository } from 'src/user/repositories/item.repository'
 import { ModuleRepository } from 'src/user/repositories/module.repository'
 import { RolRepository } from 'src/user/repositories/rol.repository'
 import { RolItemPermissionRepository } from 'src/user/repositories/rolItemPermission.repository'
+import { RolesSeeder } from './roles.seeder'
 
 interface ModuleSeed {
   name: string
@@ -129,6 +130,7 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
     private readonly permissionRepository: PermissionRepository,
     private readonly rolRepository: RolRepository,
     private readonly rolItemPermissionRepository: RolItemPermissionRepository,
+    private readonly rolesSeeder: RolesSeeder,
   ) {}
 
   async onModuleInit() {
@@ -139,6 +141,7 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
   async seed() {
     this.logger.log('Sembrando menú y permisos...')
 
+    await this.rolesSeeder.seed()
     await this.seedModules()
     await this.seedItems()
     await this.seedPermissions()
@@ -160,17 +163,18 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
 
   private async seedItems() {
     for (const item of this.items) {
+      const module = await this.moduleRepository.findOneBy({
+        name: item.moduleName,
+      })
+      if (!module) {
+        this.logger.warn(
+          `Módulo no encontrado para item ${item.name}: ${item.moduleName}`,
+        )
+        continue
+      }
+
       const existing = await this.itemRepository.findOneBy({ name: item.name })
       if (!existing) {
-        const module = await this.moduleRepository.findOneBy({
-          name: item.moduleName,
-        })
-        if (!module) {
-          this.logger.warn(
-            `Módulo no encontrado para item ${item.name}: ${item.moduleName}`,
-          )
-          continue
-        }
         await this.itemRepository.save(
           this.itemRepository.create({
             name: item.name,
@@ -181,6 +185,12 @@ export class MenuAndPermissionsSeeder implements OnModuleInit {
           }),
         )
         this.logger.log(`Item creado: ${item.name}`)
+      } else if (Number(existing.moduleId) !== Number(module.id)) {
+        // El item existe pero apunta a un módulo diferente (e.g. soft-deleted); corregir
+        await this.itemRepository.save({ ...existing, moduleId: module.id })
+        this.logger.log(
+          `Item actualizado moduleId: ${item.name} → módulo ${module.id}`,
+        )
       }
     }
   }

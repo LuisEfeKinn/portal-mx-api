@@ -3,54 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portal de Exámenes — Admin</title>
+  <title>Portal de Exámenes</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
   <style>
-    :root { --sidebar-w:240px; --header-h:56px; --primary:#4f6ef7; }
+    :root { --sidebar-w:240px; --header-h:56px; --primary:#7b2d8b; --primary-light:#f3e8f7; }
     * { box-sizing:border-box; }
-    body { background:#f4f6fb; margin:0; font-family:system-ui,sans-serif; }
+    body { background:#f5f5f5; margin:0; font-family:system-ui,sans-serif; }
 
     /* ── Login ── */
     #page-login { min-height:100vh; display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(135deg,#eef1fd 0%,#f4f6fb 100%); }
+      background:linear-gradient(135deg,#f3e8f7 0%,#f5f5f5 100%); }
     #page-login .card { width:380px; border:none; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,.10); }
 
     /* ── App shell ── */
     #page-app { display:none; min-height:100vh; }
-
     .app-header { position:fixed; top:0; left:0; right:0; height:var(--header-h);
       background:#fff; border-bottom:1px solid #e3e6ef;
       display:flex; align-items:center; padding:0 1.25rem; gap:1rem; z-index:100; }
     .app-header .brand { font-weight:700; color:var(--primary); font-size:1rem; }
     .app-header .spacer { flex:1; }
     .app-header .user-chip { display:flex; align-items:center; gap:8px;
-      background:#f0f2ff; border-radius:99px; padding:4px 12px 4px 4px; font-size:.82rem; }
+      background:var(--primary-light); border-radius:99px; padding:4px 12px 4px 4px; font-size:.82rem; }
     .app-header .user-chip .avatar { width:28px; height:28px; border-radius:50%;
       background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center;
       font-size:.75rem; font-weight:700; }
 
+    /* Sidebar */
     .app-sidebar { position:fixed; top:var(--header-h); left:0; bottom:0; width:var(--sidebar-w);
-      background:#fff; border-right:1px solid #e3e6ef; overflow-y:auto;
-      padding:.75rem 0; z-index:90; }
+      background:#fff; border-right:1px solid #e3e6ef; overflow-y:auto; padding:.75rem 0; z-index:90; }
     .nav-module-label { font-size:.7rem; font-weight:700; letter-spacing:.08em;
       color:#9aa3b2; text-transform:uppercase; padding:.9rem 1.1rem .3rem; }
     .nav-item-link { display:flex; align-items:center; gap:10px;
       padding:.55rem 1.1rem; margin:1px .5rem; border-radius:8px; cursor:pointer;
       color:#4b5563; font-size:.855rem; text-decoration:none; transition:background .15s,color .15s; }
-    .nav-item-link:hover { background:#f0f2ff; color:var(--primary); }
-    .nav-item-link.active { background:#eef1fd; color:var(--primary); font-weight:600; }
+    .nav-item-link:hover { background:var(--primary-light); color:var(--primary); }
+    .nav-item-link.active { background:var(--primary-light); color:var(--primary); font-weight:600; }
     .nav-item-link i { font-size:1rem; width:18px; text-align:center; }
 
+    /* Content */
     .app-content { margin-top:var(--header-h); margin-left:var(--sidebar-w);
       padding:1.75rem; min-height:calc(100vh - var(--header-h)); }
-
     .card { border:none; border-radius:12px; box-shadow:0 1px 6px rgba(0,0,0,.07); }
+    .section { display:none; }
+    .section.active { display:block; }
 
     /* Drop zone */
     .drop-zone { border:2px dashed #b0b8d1; border-radius:10px; background:#f8f9fc;
       padding:2rem 1.5rem; text-align:center; cursor:pointer; transition:border-color .2s,background .2s; }
-    .drop-zone:hover, .drop-zone.drag-over { border-color:var(--primary); background:#eef1fd; }
+    .drop-zone:hover, .drop-zone.drag-over { border-color:var(--primary); background:var(--primary-light); }
     .drop-zone.has-file { border-color:var(--primary); }
     .drop-zone i.main-icon { font-size:2.5rem; color:#b0b8d1; }
     .drop-zone.has-file i.main-icon { color:var(--primary); }
@@ -68,11 +69,9 @@
     .s-insertados { background:#d1fae5; } .s-insertados .num { color:#059669; }
     .s-omitidos   { background:#fef9c3; } .s-omitidos .num   { color:#ca8a04; }
     .s-errores    { background:#fee2e2; } .s-errores .num    { color:#dc2626; }
-
     .progress { height:8px; border-radius:99px; }
-    .section { display:none; }
-    .section.active { display:block; }
 
+    /* Status badges */
     .badge-pending    { background:#6c757d!important; }
     .badge-processing { background:#0d6efd!important; }
     .badge-done       { background:#198754!important; }
@@ -80,9 +79,7 @@
 
     .spin { animation:spin 1s linear infinite; display:inline-block; }
     @keyframes spin { to { transform:rotate(360deg); } }
-
     #toast-wrap { position:fixed; bottom:1.25rem; right:1.25rem; z-index:9999; }
-
     .dot { width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px; }
     .dot-active { background:#22c55e; }
     .dot-inactive { background:#e5e7eb; border:1px solid #d1d5db; }
@@ -90,30 +87,69 @@
     /* Convocatorias */
     .conv-card { border-radius:12px; border:1px solid #e3e6ef; background:#fff;
       padding:1.1rem 1.2rem; transition:box-shadow .15s; cursor:pointer; }
-    .conv-card:hover { box-shadow:0 4px 16px rgba(79,110,247,.12); }
-    .conv-card.selected { border-color:var(--primary); box-shadow:0 0 0 3px rgba(79,110,247,.15); }
+    .conv-card:hover { box-shadow:0 4px 16px rgba(123,45,139,.12); }
+    .conv-card.selected { border-color:var(--primary); box-shadow:0 0 0 3px rgba(123,45,139,.15); }
     .conv-date-row { display:flex; gap:1rem; flex-wrap:wrap; margin-top:.6rem; }
     .conv-date { font-size:.75rem; color:#6c757d; }
     .conv-date strong { color:#374151; }
-
-    /* Resource list */
     .resource-row { display:flex; align-items:center; gap:.5rem; padding:.5rem .75rem;
       border-radius:8px; background:#f8f9fc; margin-bottom:.4rem; }
-    .resource-row:hover { background:#f0f2ff; }
+    .resource-row:hover { background:var(--primary-light); }
     .resource-title { flex:1; font-size:.85rem; font-weight:500; }
     .resource-milestone { font-size:.72rem; background:#e0e7ff; color:#4338ca;
       border-radius:4px; padding:2px 7px; }
+
+    /* ── Milestone timeline (Tu Avance) ── */
+    .timeline-wrap { padding:2rem 1rem; overflow-x:auto; }
+    .timeline { display:flex; align-items:flex-start; position:relative; min-width:600px; }
+    .tl-step { display:flex; flex-direction:column; align-items:center; flex:1; position:relative; }
+    .tl-step:not(:last-child)::after {
+      content:''; position:absolute; top:16px; left:50%; right:-50%;
+      height:3px; background:#e5e7eb; z-index:0;
+    }
+    .tl-step.done:not(:last-child)::after { background:var(--primary); }
+    .tl-circle {
+      width:34px; height:34px; border-radius:50%; border:3px solid #e5e7eb;
+      background:#fff; display:flex; align-items:center; justify-content:center;
+      font-size:.85rem; position:relative; z-index:1; transition:all .2s;
+    }
+    .tl-step.done .tl-circle { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .tl-step.active .tl-circle { border-color:var(--primary); box-shadow:0 0 0 4px rgba(123,45,139,.2); }
+    .tl-label { font-size:.65rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:.04em; margin-top:.5rem; text-align:center; color:#6c757d; max-width:80px; }
+    .tl-step.done .tl-label { color:var(--primary); }
+    .tl-step.active .tl-label { color:var(--primary); font-weight:800; }
+    .tl-date { font-size:.68rem; color:#9ca3af; margin-top:2px; text-align:center; }
+    .tl-resource-btn { margin-top:.6rem; background:#f3f4f6; border:none; border-radius:8px;
+      padding:.35rem .5rem; cursor:pointer; font-size:.72rem; color:#6b7280; transition:all .15s; }
+    .tl-resource-btn:hover { background:var(--primary-light); color:var(--primary); }
+    .tl-resource-btn.active-resource { background:var(--primary); color:#fff; }
+
+    /* Sub-nav tabs (sección usuario) */
+    .sub-nav { display:flex; gap:.5rem; margin-bottom:1.5rem; }
+    .sub-nav-btn { background:none; border:none; padding:.5rem 1.1rem; border-radius:8px;
+      font-size:.875rem; cursor:pointer; color:#6b7280; transition:all .15s; }
+    .sub-nav-btn.active { background:var(--primary); color:#fff; font-weight:600; }
+    .sub-nav-btn:hover:not(.active) { background:var(--primary-light); color:var(--primary); }
+
+    /* Monitor de incidencias */
+    .monitor-header { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+    .incidencia-title { color:#7b2d8b; font-weight:600; font-size:.88rem; }
+    .monitor-row td { vertical-align:top; padding:.85rem .6rem; font-size:.82rem; }
+    .participant-block { line-height:1.6; }
+    .participant-name { font-weight:600; font-size:.85rem; }
+    .participant-meta { font-size:.75rem; color:#6c757d; }
   </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════ LOGIN ═══ -->
+<!-- ══════════════════════════════════════ LOGIN ══ -->
 <div id="page-login">
   <div class="card p-4">
     <div class="text-center mb-4">
-      <i class="bi bi-mortarboard-fill text-primary fs-2"></i>
+      <i class="bi bi-mortarboard-fill fs-2" style="color:var(--primary)"></i>
       <h5 class="fw-bold mt-2 mb-0">Portal de Exámenes</h5>
-      <small class="text-muted">Panel Administrativo</small>
+      <small class="text-muted">Accede con tu cuenta</small>
     </div>
     <div class="mb-3">
       <label class="form-label small fw-medium">Correo</label>
@@ -124,18 +160,19 @@
       <input id="loginPassword" type="password" class="form-control" value="Admin123*" />
     </div>
     <div id="loginError" class="alert alert-danger py-2 small d-none"></div>
-    <button id="btnLogin" class="btn btn-primary w-100 mt-1" onclick="doLogin()">
+    <button id="btnLogin" class="btn w-100 mt-1 text-white" style="background:var(--primary)" onclick="doLogin()">
       <i class="bi bi-box-arrow-in-right me-2"></i>Entrar
     </button>
+    <div class="mt-3 text-center" style="font-size:.75rem;color:#9ca3af">
+      admin@portal.com · viewer@portal.com · user@portal.com
+    </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════ APP ══════ -->
+<!-- ══════════════════════════════════════ APP ═══ -->
 <div id="page-app">
-
-  <!-- Header -->
   <header class="app-header">
-    <i class="bi bi-mortarboard-fill text-primary fs-5"></i>
+    <i class="bi bi-mortarboard-fill fs-5" style="color:var(--primary)"></i>
     <span class="brand">Portal de Exámenes</span>
     <div class="spacer"></div>
     <div class="user-chip">
@@ -147,20 +184,16 @@
     </div>
   </header>
 
-  <!-- Sidebar -->
   <nav class="app-sidebar" id="sidebar">
     <div class="text-center py-3 text-muted small" id="sidebarLoading">
-      <span class="spinner-border spinner-border-sm me-1"></span> Cargando menú...
+      <span class="spinner-border spinner-border-sm me-1"></span> Cargando...
     </div>
   </nav>
 
-  <!-- Content -->
   <main class="app-content">
 
-    <!-- ════════════════════════════════════════════════ USUARIOS ══ -->
+    <!-- ════════════════ ADMIN: USUARIOS ════════════════ -->
     <div id="section-users" class="section">
-
-      <!-- Tracking view -->
       <div id="view-tracking" style="display:none">
         <button class="btn btn-sm btn-outline-secondary mb-3" onclick="closeTracking()">
           <i class="bi bi-arrow-left me-1"></i>Volver
@@ -192,57 +225,48 @@
                 </tbody>
               </table>
             </div>
-            <div id="tPollingAlert" class="alert alert-secondary small mt-3 mb-0 d-flex gap-2 align-items-start" style="display:none!important">
-              <i class="bi bi-broadcast-pin text-primary mt-1"></i>
-              Actualizando cada <strong class="mx-1">5 segundos</strong> hasta que finalice.
+            <div id="tPollingAlert" class="alert alert-secondary small mt-3 mb-0 d-none">
+              <i class="bi bi-broadcast-pin text-primary me-1"></i>
+              Actualizando cada <strong class="mx-1">5 s</strong> hasta que finalice.
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Main view -->
       <div id="view-main">
-
         <div class="row g-3 mb-3">
-          <!-- Drop zone — Cargue masivo usuarios -->
           <div class="col-lg-6">
             <div class="card p-4 h-100">
-              <h6 class="fw-semibold mb-3"><i class="bi bi-upload me-2 text-primary"></i>Cargue masivo de usuarios</h6>
+              <h6 class="fw-semibold mb-3"><i class="bi bi-upload me-2" style="color:var(--primary)"></i>Cargue masivo de usuarios</h6>
               <div class="drop-zone mb-3" id="dropZone" onclick="document.getElementById('fileInput').click()">
                 <i class="bi bi-file-earmark-spreadsheet main-icon"></i>
                 <p class="mb-1 mt-2 fw-medium text-secondary small">Arrastra tu archivo aquí o haz clic</p>
                 <span class="badge bg-light text-secondary border">.xlsx · .xls &nbsp;|&nbsp; máx 50 MB</span>
-                <div id="fileNameLabel" class="small text-primary fw-medium mt-2 d-none"></div>
+                <div id="fileNameLabel" class="small fw-medium mt-2 d-none" style="color:var(--primary)"></div>
               </div>
               <input type="file" id="fileInput" class="d-none" accept=".xlsx,.xls" />
               <div class="d-flex gap-2">
-                <button class="btn btn-primary btn-sm px-3 flex-fill" id="btnUpload" disabled onclick="doUpload()">
+                <button class="btn btn-sm px-3 flex-fill text-white" style="background:var(--primary)" id="btnUpload" disabled onclick="doUpload()">
                   <i class="bi bi-cloud-upload me-2"></i>Cargar usuarios
                 </button>
-                <button class="btn btn-outline-success btn-sm px-3" onclick="openProgressModal()"
-                  title="Subir avance de examen">
+                <button class="btn btn-sm btn-outline-success px-3" onclick="openProgressModal()" title="Subir avance de examen">
                   <i class="bi bi-graph-up-arrow me-1"></i>Agregar avance
                 </button>
               </div>
             </div>
           </div>
-
-          <!-- Columnas -->
           <div class="col-lg-6">
             <div class="card p-4 h-100">
-              <h6 class="fw-semibold mb-3"><i class="bi bi-table me-2 text-success"></i>Columnas del Excel (usuarios)</h6>
+              <h6 class="fw-semibold mb-3"><i class="bi bi-table me-2 text-success"></i>Columnas del Excel</h6>
               <div class="mb-2">
                 <div class="small text-muted fw-semibold mb-1">Obligatorias</div>
-                <span class="col-badge req">correo</span>
-                <span class="col-badge req">nombre</span>
-                <span class="col-badge req">apellido</span>
-                <span class="col-badge req">identificacion</span>
+                <span class="col-badge req">correo</span><span class="col-badge req">nombre</span>
+                <span class="col-badge req">apellido</span><span class="col-badge req">identificacion</span>
                 <span class="col-badge req">contrasena</span>
               </div>
               <div class="mb-3">
                 <div class="small text-muted fw-semibold mb-1">Opcionales</div>
-                <span class="col-badge">segundo_nombre</span>
-                <span class="col-badge">segundo_apellido</span>
+                <span class="col-badge">segundo_nombre</span><span class="col-badge">segundo_apellido</span>
               </div>
               <div class="alert alert-info py-2 mb-0 small">
                 <i class="bi bi-info-circle me-1"></i>
@@ -252,7 +276,6 @@
           </div>
         </div>
 
-        <!-- Historial de jobs (máx 3) -->
         <div class="card p-3 mb-3">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <h6 class="fw-semibold mb-0 small"><i class="bi bi-clock-history me-2 text-secondary"></i>Últimos cargues</h6>
@@ -263,17 +286,10 @@
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0" style="font-size:.82rem">
               <thead class="table-light">
-                <tr>
-                  <th>Archivo</th><th>Estado</th>
-                  <th class="text-center">Total</th><th class="text-center">Insertados</th>
-                  <th class="text-center">Omitidos</th><th class="text-center">Errores</th>
-                  <th>Fecha</th><th></th>
-                </tr>
+                <tr><th>Archivo</th><th>Estado</th><th class="text-center">Total</th><th class="text-center">Insertados</th><th class="text-center">Omitidos</th><th class="text-center">Errores</th><th>Fecha</th><th></th></tr>
               </thead>
               <tbody id="jobsBody">
-                <tr><td colspan="8" class="text-center text-muted py-3">
-                  <span class="spinner-border spinner-border-sm me-1"></span>Cargando...
-                </td></tr>
+                <tr><td colspan="8" class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-1"></span>Cargando...</td></tr>
               </tbody>
             </table>
           </div>
@@ -283,30 +299,21 @@
           </div>
         </div>
 
-        <!-- Tabla de usuarios -->
         <div class="card p-3">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="fw-semibold mb-0 small"><i class="bi bi-people me-2 text-primary"></i>Usuarios registrados</h6>
+            <h6 class="fw-semibold mb-0 small"><i class="bi bi-people me-2" style="color:var(--primary)"></i>Usuarios registrados</h6>
             <div class="d-flex gap-2">
-              <input id="userSearch" type="text" class="form-control form-control-sm" placeholder="Buscar..." style="width:180px"
-                oninput="debounceUserSearch()" />
-              <button class="btn btn-sm btn-outline-secondary py-0" onclick="loadUsers(1)">
-                <i class="bi bi-arrow-clockwise"></i>
-              </button>
+              <input id="userSearch" type="text" class="form-control form-control-sm" placeholder="Buscar..." style="width:180px" oninput="debounceUserSearch()" />
+              <button class="btn btn-sm btn-outline-secondary py-0" onclick="loadUsers(1)"><i class="bi bi-arrow-clockwise"></i></button>
             </div>
           </div>
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0" style="font-size:.82rem">
               <thead class="table-light">
-                <tr>
-                  <th>Nombre</th><th>Correo</th><th>Identificación</th>
-                  <th>Rol</th><th>Estado</th><th>Registro</th>
-                </tr>
+                <tr><th>Nombre</th><th>Correo</th><th>Identificación</th><th>Rol</th><th>Estado</th><th>Registro</th></tr>
               </thead>
               <tbody id="usersBody">
-                <tr><td colspan="6" class="text-center text-muted py-3">
-                  <span class="spinner-border spinner-border-sm me-1"></span>Cargando...
-                </td></tr>
+                <tr><td colspan="6" class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-1"></span>Cargando...</td></tr>
               </tbody>
             </table>
           </div>
@@ -315,32 +322,21 @@
             <nav><ul class="pagination pagination-sm mb-0" id="usersPagLinks"></ul></nav>
           </div>
         </div>
+      </div>
+    </div>
 
-      </div><!-- /view-main -->
-    </div><!-- /section-users -->
-
-    <!-- ════════════════════════════════════ CONVOCATORIAS ══ -->
+    <!-- ════════════════ ADMIN: CONVOCATORIAS ════════════════ -->
     <div id="section-convocatorias" class="section">
       <div class="row g-3">
-
-        <!-- Lista de convocatorias -->
         <div class="col-lg-5">
           <div class="card p-3 h-100">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h6 class="fw-semibold mb-0 small"><i class="bi bi-calendar-event me-2 text-primary"></i>Convocatorias</h6>
-              <button class="btn btn-sm btn-outline-secondary py-0" onclick="loadAnnouncements()">
-                <i class="bi bi-arrow-clockwise"></i>
-              </button>
+              <h6 class="fw-semibold mb-0 small"><i class="bi bi-calendar-event me-2" style="color:var(--primary)"></i>Convocatorias</h6>
+              <button class="btn btn-sm btn-outline-secondary py-0" onclick="loadAnnouncements()"><i class="bi bi-arrow-clockwise"></i></button>
             </div>
-            <div id="convBody">
-              <div class="text-center text-muted py-4 small">
-                <span class="spinner-border spinner-border-sm me-1"></span>Cargando...
-              </div>
-            </div>
+            <div id="convBody"><div class="text-center text-muted py-4 small"><span class="spinner-border spinner-border-sm me-1"></span>Cargando...</div></div>
           </div>
         </div>
-
-        <!-- Panel de recursos -->
         <div class="col-lg-7">
           <div class="card p-3 h-100">
             <div id="resourcesPlaceholder" class="text-center text-muted py-5">
@@ -353,29 +349,216 @@
                   <h6 class="fw-semibold mb-0 small" id="resTitle"><i class="bi bi-folder2-open me-2 text-warning"></i>Recursos</h6>
                   <small class="text-muted" id="resSubtitle"></small>
                 </div>
-                <button class="btn btn-sm btn-primary" onclick="openResourceModal()">
+                <button class="btn btn-sm text-white" style="background:var(--primary)" onclick="openResourceModal()">
                   <i class="bi bi-plus-lg me-1"></i>Agregar
                 </button>
               </div>
-              <!-- Filtro por hito -->
               <div class="mb-3">
                 <select id="milestoneFilter" class="form-select form-select-sm" onchange="filterResources()">
                   <option value="">— Todos los hitos —</option>
                 </select>
               </div>
-              <div id="resList">
-                <div class="text-center text-muted py-3 small">
-                  <span class="spinner-border spinner-border-sm me-1"></span>Cargando recursos...
-                </div>
-              </div>
+              <div id="resList"><div class="text-center text-muted py-3 small"><span class="spinner-border spinner-border-sm me-1"></span>Cargando...</div></div>
             </div>
           </div>
         </div>
-
       </div>
-    </div><!-- /section-convocatorias -->
+    </div>
 
-    <!-- ── PLACEHOLDER ── -->
+    <!-- ════════════════ VIEWER: MONITOR DE INCIDENCIAS ════════════════ -->
+    <div id="section-reapplications" class="section">
+      <div class="card p-4">
+        <div class="monitor-header mb-4">
+          <div>
+            <div style="display:flex;align-items:center;gap:.6rem">
+              <div style="background:var(--primary-light);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center">
+                <i class="bi bi-activity" style="color:var(--primary);font-size:1.2rem"></i>
+              </div>
+              <div>
+                <h5 class="fw-bold mb-0" style="font-size:1.05rem">Monitor de Incidencias</h5>
+                <small class="text-muted">Visualiza las incidencias registradas en tiempo real.</small>
+              </div>
+            </div>
+          </div>
+          <div class="ms-auto d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm" onclick="loadMonitor()">
+              <i class="bi bi-arrow-clockwise me-1"></i>Actualizar Datos
+            </button>
+            <button class="btn btn-sm text-white" style="background:var(--primary)" onclick="downloadMonitorCsv()">
+              <i class="bi bi-download me-1"></i>Descargar Reporte (CSV)
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="row g-2 mb-4">
+          <div class="col-md-5">
+            <label class="form-label small fw-medium">Filtrar por Proceso</label>
+            <select id="monitorProcess" class="form-select form-select-sm" onchange="loadMonitor()">
+              <option value="">Todos los procesos</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-medium">Desde Fecha</label>
+            <input type="date" id="monitorFrom" class="form-control form-control-sm" onchange="loadMonitor()" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-medium">Hasta Fecha</label>
+            <input type="date" id="monitorTo" class="form-control form-control-sm" onchange="loadMonitor()" />
+          </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="table-responsive">
+          <table class="table align-middle" style="font-size:.83rem">
+            <thead class="table-light">
+              <tr>
+                <th style="width:120px">Fecha</th>
+                <th style="width:140px">Proceso</th>
+                <th style="width:180px">Participante</th>
+                <th>Incidencia</th>
+                <th style="width:110px">Evidencia</th>
+              </tr>
+            </thead>
+            <tbody id="monitorBody">
+              <tr><td colspan="5" class="text-center text-muted py-4">
+                <span class="spinner-border spinner-border-sm me-1"></span>Cargando...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ USUARIO: TU AVANCE + REAPLICACIÓN ════════════════ -->
+    <div id="section-user-home" class="section">
+      <div class="sub-nav">
+        <button class="sub-nav-btn active" id="btnSubAvance" onclick="switchUserView('avance')">
+          <i class="bi bi-bar-chart-steps me-1"></i>Tu Avance
+        </button>
+        <button class="sub-nav-btn" id="btnSubReap" onclick="switchUserView('reaplicacion')">
+          <i class="bi bi-send me-1"></i>Solicitar Reaplicación
+        </button>
+        <button class="sub-nav-btn" id="btnSubMisSol" onclick="switchUserView('mis-solicitudes')">
+          <i class="bi bi-list-ul me-1"></i>Mis Solicitudes
+        </button>
+      </div>
+
+      <!-- Vista: Tu Avance -->
+      <div id="user-view-avance">
+        <div class="card p-4">
+          <div class="text-center mb-4">
+            <h4 class="fw-bold mb-1">Tu Avance</h4>
+            <p class="text-muted small mb-2">Sigue cada paso de tu proceso</p>
+            <span class="badge px-3 py-2 fs-6" style="background:var(--primary)" id="userConvName">Cargando convocatoria...</span>
+          </div>
+
+          <div class="timeline-wrap">
+            <div class="timeline" id="milestoneTimeline">
+              <div class="text-muted small text-center w-100 py-3">
+                <span class="spinner-border spinner-border-sm me-1"></span>Cargando hitos...
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel de recursos del hito seleccionado -->
+          <div class="card mt-3 p-3" id="milestoneResourcePanel" style="background:#fafafa">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <div style="background:var(--primary-light);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center">
+                <i class="bi bi-question-circle" style="color:var(--primary)"></i>
+              </div>
+              <div>
+                <div class="fw-semibold small" id="panelMilestoneName">—</div>
+                <div class="text-muted" style="font-size:.73rem">Material de apoyo para esta etapa del proceso.</div>
+              </div>
+            </div>
+            <div id="panelResourcesList" class="text-muted small text-center py-3">
+              Selecciona un hito para ver sus recursos.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vista: Solicitar Reaplicación -->
+      <div id="user-view-reaplicacion" style="display:none">
+        <div class="row g-3">
+          <div class="col-lg-7">
+            <div class="card p-4">
+              <h6 class="fw-semibold mb-3"><i class="bi bi-send me-2" style="color:var(--primary)"></i>Nueva solicitud de reaplicación</h6>
+              <div class="mb-3">
+                <label class="form-label small fw-medium">Convocatoria <span class="text-danger">*</span></label>
+                <select id="reapConv" class="form-select form-select-sm"></select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-medium">Tipo de incidencia <span class="text-danger">*</span></label>
+                <select id="reapIncSelect" class="form-select form-select-sm" onchange="updateIncInput()">
+                  <option value="">— Selecciona o escribe uno —</option>
+                  <option>Urgencia o suceso médico</option>
+                  <option>Falla de energía eléctrica</option>
+                  <option>Siniestro o desastre natural</option>
+                  <option>Problemas de conectividad severos</option>
+                  <option>Defunción de familiar directo</option>
+                  <option value="otro">Otro (especificar)</option>
+                </select>
+                <input type="text" id="reapIncCustom" class="form-control form-control-sm mt-2 d-none"
+                  placeholder="Describe el tipo de incidencia..." />
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-medium">Descripción detallada <span class="text-danger">*</span></label>
+                <textarea id="reapDesc" class="form-control form-control-sm" rows="4"
+                  placeholder="Explica con detalle lo que ocurrió..."></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-medium">Documento de soporte (opcional)</label>
+                <div class="drop-zone" id="reapDropZone" onclick="document.getElementById('reapFile').click()" style="padding:1rem">
+                  <i class="bi bi-paperclip main-icon" style="font-size:1.8rem"></i>
+                  <p class="mb-0 mt-1 small text-secondary">PDF, imagen o Word · máx 20 MB</p>
+                  <div id="reapFileName" class="small fw-medium mt-1 d-none" style="color:var(--primary)"></div>
+                </div>
+                <input type="file" id="reapFile" class="d-none"
+                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+              </div>
+              <div id="reapAlert" class="d-none"></div>
+              <button class="btn w-100 text-white" style="background:var(--primary)" onclick="submitReapplication()">
+                <i class="bi bi-send me-2"></i>Enviar solicitud
+              </button>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="card p-3">
+              <h6 class="fw-semibold mb-2 small"><i class="bi bi-info-circle me-2 text-warning"></i>¿Cuándo aplica?</h6>
+              <ul class="list-unstyled mb-0" style="font-size:.82rem;color:#4b5563">
+                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>No pudiste presentar el examen por causa de fuerza mayor</li>
+                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>El evento fue ajeno a tu voluntad</li>
+                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Puedes acreditar la incidencia con documentación</li>
+                <li class="mt-3"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Solo se permite una solicitud por convocatoria</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vista: Mis Solicitudes -->
+      <div id="user-view-mis-solicitudes" style="display:none">
+        <div class="card p-3">
+          <h6 class="fw-semibold mb-3 small"><i class="bi bi-list-ul me-2 text-secondary"></i>Mis solicitudes enviadas</h6>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="font-size:.82rem">
+              <thead class="table-light">
+                <tr><th>Folio</th><th>Proceso</th><th>Incidencia</th><th>Fecha</th><th>Evidencia</th></tr>
+              </thead>
+              <tbody id="myReapBody">
+                <tr><td colspan="5" class="text-center text-muted py-3">
+                  <span class="spinner-border spinner-border-sm me-1"></span>Cargando...
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ PLACEHOLDER ════════════════ -->
     <div id="section-placeholder" class="section">
       <div class="card p-5 text-center text-muted">
         <i class="bi bi-tools fs-1 mb-3"></i>
@@ -385,44 +568,33 @@
     </div>
 
   </main>
-</div><!-- /page-app -->
+</div>
 
 <div id="toast-wrap"></div>
 
-<!-- ════════════════════════════════════ MODAL AGREGAR AVANCE ══ -->
+<!-- ══ MODAL: Agregar Avance ══ -->
 <div class="modal fade" id="modalProgress" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
       <div class="modal-header border-0 pb-0">
-        <h6 class="modal-title fw-semibold">
-          <i class="bi bi-graph-up-arrow me-2 text-success"></i>Agregar avance de examen
-        </h6>
+        <h6 class="modal-title fw-semibold"><i class="bi bi-graph-up-arrow me-2 text-success"></i>Agregar avance de examen</h6>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <div class="alert alert-info small mb-3">
-          <i class="bi bi-info-circle me-1"></i>
-          Sube el archivo Excel con los resultados del examen. Los usuarios serán marcados con el avance correspondiente.
-        </div>
+        <div class="alert alert-info small mb-3"><i class="bi bi-info-circle me-1"></i>Sube el Excel con resultados del examen.</div>
         <div class="mb-3">
           <label class="form-label small fw-medium">Columnas del Excel</label>
           <div>
-            <span class="col-badge req">email</span>
-            <span class="col-badge req">hito</span>
-            <span class="col-badge req">aprobado</span>
-            <span class="col-badge">puntaje</span>
-            <span class="col-badge">fecha_examen</span>
+            <span class="col-badge req">email</span><span class="col-badge req">hito</span>
+            <span class="col-badge req">aprobado</span><span class="col-badge">puntaje</span><span class="col-badge">fecha_examen</span>
           </div>
-          <div class="mt-2 small text-muted">
-            <strong>hito:</strong> clave del hito (ej: <code>application</code>) ·
-            <strong>aprobado:</strong> <code>si</code> / <code>no</code>
-          </div>
+          <div class="mt-2 small text-muted"><strong>hito:</strong> clave (ej: <code>application</code>) · <strong>aprobado:</strong> <code>si</code> / <code>no</code></div>
         </div>
         <div class="drop-zone mb-3" id="progressDropZone" onclick="document.getElementById('progressFileInput').click()">
           <i class="bi bi-file-earmark-bar-graph main-icon"></i>
           <p class="mb-1 mt-2 fw-medium text-secondary small">Arrastra tu archivo aquí o haz clic</p>
           <span class="badge bg-light text-secondary border">.xlsx · .xls</span>
-          <div id="progressFileLabel" class="small text-primary fw-medium mt-2 d-none"></div>
+          <div id="progressFileLabel" class="small fw-medium mt-2 d-none" style="color:var(--primary)"></div>
         </div>
         <input type="file" id="progressFileInput" class="d-none" accept=".xlsx,.xls" />
         <div id="progressAlert" class="d-none"></div>
@@ -437,14 +609,12 @@
   </div>
 </div>
 
-<!-- ════════════════════════════════════ MODAL AGREGAR RECURSO ══ -->
+<!-- ══ MODAL: Recurso ══ -->
 <div class="modal fade" id="modalResource" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
       <div class="modal-header border-0 pb-0">
-        <h6 class="modal-title fw-semibold" id="resourceModalTitle">
-          <i class="bi bi-link-45deg me-2 text-warning"></i>Agregar recurso
-        </h6>
+        <h6 class="modal-title fw-semibold" id="resourceModalTitle"><i class="bi bi-link-45deg me-2 text-warning"></i>Agregar recurso</h6>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
@@ -469,7 +639,7 @@
       </div>
       <div class="modal-footer border-0 pt-0">
         <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-        <button class="btn btn-primary btn-sm" id="btnSaveResource" onclick="saveResource()">
+        <button class="btn btn-sm text-white" style="background:var(--primary)" id="btnSaveResource" onclick="saveResource()">
           <i class="bi bi-check-lg me-1"></i>Guardar
         </button>
       </div>
@@ -480,23 +650,25 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // ─── Config ────────────────────────────────────────────────────────────────────
-const API           = 'http://localhost:3000'
+const API = 'http://localhost:3000'
 const JOBS_PER_PAGE  = 3
 const USERS_PER_PAGE = 10
-let token         = localStorage.getItem('portal_token') || null
-let pollingTimer  = null
-let usersPage     = 1
-let jobsPage      = 1
-let searchTimer   = null
-let activeSection = 'section-users'
+let token        = localStorage.getItem('portal_token') || null
+let pollingTimer = null
+let usersPage    = 1
+let jobsPage     = 1
+let searchTimer  = null
 
-// Convocatorias state
+// State
 let allAnnouncements = []
 let allMilestones    = []
 let allResources     = []
 let selectedConvId   = null
-let progressFile     = null
 let selectedBulkFile = null
+let progressFile     = null
+let reapFile         = null
+let userRoles        = []
+let selectedMilestoneId = null
 
 // ─── Boot ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -506,7 +678,6 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 })
 
-// ─── Auth ──────────────────────────────────────────────────────────────────────
 async function doLogin() {
   const email    = document.getElementById('loginEmail').value.trim()
   const password = document.getElementById('loginPassword').value
@@ -516,7 +687,7 @@ async function doLogin() {
   btn.disabled = true
   btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Entrando...'
   try {
-    const res  = await api('POST', '/auth/sign-in', { email, password }, false)
+    const res = await api('POST', '/auth/sign-in', { email, password }, false)
     token = res.accessToken
     localStorage.setItem('portal_token', token)
     bootApp()
@@ -542,49 +713,56 @@ async function bootApp() {
   document.getElementById('page-app').style.display = 'block'
   try {
     const data = await api('GET', '/users/init-data')
-    renderSidebar(data)
     document.getElementById('headerEmail').textContent = data.email
-    document.getElementById('avatarInitial').textContent =
-      (data.names || data.email || 'A')[0].toUpperCase()
+    document.getElementById('avatarInitial').textContent = (data.names || data.email || 'A')[0].toUpperCase()
+    userRoles = (data.roles || []).map(r => r.key || r.name || '').filter(Boolean)
+    renderSidebar(data)
   } catch {
     toast('Error al cargar el menú', 'danger')
   }
-  // Precargar milestones para el formulario de recursos
-  try {
-    allMilestones = await api('GET', '/announcements/milestones')
-  } catch { /* silencioso */ }
 
-  navigateTo('section-users')
+  try { allMilestones = await api('GET', '/announcements/milestones') } catch { /* silencioso */ }
+  try { allAnnouncements = await api('GET', '/announcements') } catch { /* silencioso */ }
+
+  // Navegar a sección según rol
+  if (userRoles.includes('user') && !userRoles.includes('admin')) {
+    navigateTo('section-user-home')
+  } else if (userRoles.includes('viewer') && !userRoles.includes('admin')) {
+    navigateTo('section-reapplications')
+  } else {
+    navigateTo('section-users')
+  }
 }
 
 // ─── Sidebar ───────────────────────────────────────────────────────────────────
 const ICON_MAP = {
-  'ic_dashboard': 'bi-speedometer2',
-  'ic_users':     'bi-people',
-  'ic_calendar':  'bi-calendar-event',
-  'ic_folder':    'bi-folder2-open',
-  'ic_file':      'bi-file-earmark-text',
-  'ic_chart':     'bi-bar-chart-line',
+  'ic_dashboard':'bi-speedometer2','ic_users':'bi-people','ic_calendar':'bi-calendar-event',
+  'ic_folder':'bi-folder2-open','ic_file':'bi-file-earmark-text','ic_chart':'bi-bar-chart-line',
+  'ic_alert':'bi-exclamation-triangle','ic_home':'bi-house',
 }
 
 function renderSidebar(data) {
   document.getElementById('sidebarLoading').style.display = 'none'
   const sidebar = document.getElementById('sidebar')
-  const allModules = data.roles.flatMap(r => r.modules)
+
+  // Para usuario sin módulos asignados, mostrar menú básico
+  const allModules = (data.roles || []).flatMap(r => r.modules || [])
+  if (!allModules.length) {
+    sidebar.innerHTML = renderUserSidebar()
+    return
+  }
+
   const seen = new Set()
-  const unique = allModules.filter(m => {
-    if (seen.has(m.moduleId)) return false
-    seen.add(m.moduleId); return true
-  })
+  const unique = allModules.filter(m => { if (seen.has(m.moduleId)) return false; seen.add(m.moduleId); return true })
   unique.sort((a, b) => a.order - b.order)
+
   let html = ''
   unique.forEach(mod => {
     html += `<div class="nav-module-label">${esc(mod.subheader.replace('.title',''))}</div>`
     mod.items.forEach(item => {
       const icon = ICON_MAP[item.icon] || 'bi-circle'
       const section = routeToSection(item.path)
-      html += `<a class="nav-item-link" data-section="${section}"
-                  onclick="navigateTo('${section}', '${esc(item.name)}')">
+      html += `<a class="nav-item-link" data-section="${section}" onclick="navigateTo('${section}','${esc(item.name)}')">
                  <i class="bi ${icon}"></i>${esc(item.name.split('.').pop())}
                </a>`
     })
@@ -592,13 +770,21 @@ function renderSidebar(data) {
   sidebar.innerHTML = html
 }
 
+function renderUserSidebar() {
+  return `
+    <div class="nav-module-label">Mi Portal</div>
+    <a class="nav-item-link" data-section="section-user-home" onclick="navigateTo('section-user-home')">
+      <i class="bi bi-bar-chart-steps"></i>Tu Avance
+    </a>
+  `
+}
+
 function routeToSection(path) {
   if (path.includes('users'))          return 'section-users'
   if (path.includes('dashboard'))      return 'section-placeholder'
-  if (path.includes('announcements'))  return 'section-convocatorias'
-  if (path.includes('applications'))   return 'section-convocatorias'
+  if (path.includes('announcements') || path.includes('applications')) return 'section-convocatorias'
   if (path.includes('resources'))      return 'section-convocatorias'
-  if (path.includes('reapplications')) return 'section-placeholder'
+  if (path.includes('reapplications')) return 'section-reapplications'
   return 'section-placeholder'
 }
 
@@ -606,20 +792,18 @@ function navigateTo(sectionId, label) {
   document.querySelectorAll('.nav-item-link').forEach(el =>
     el.classList.toggle('active', el.dataset.section === sectionId))
   document.querySelectorAll('.section').forEach(el => el.classList.remove('active'))
-  document.getElementById(sectionId).classList.add('active')
-  if (label) document.getElementById('placeholderTitle').textContent = label.split('.').pop()
-  activeSection = sectionId
-  if (sectionId === 'section-users') {
-    closeTracking()
-    loadJobs(1)
-    loadUsers(1)
-  }
-  if (sectionId === 'section-convocatorias') {
-    loadAnnouncements()
-  }
+  const el = document.getElementById(sectionId)
+  if (el) el.classList.add('active')
+  if (label && document.getElementById('placeholderTitle'))
+    document.getElementById('placeholderTitle').textContent = label.split('.').pop()
+
+  if (sectionId === 'section-users') { closeTracking(); loadJobs(1); loadUsers(1) }
+  if (sectionId === 'section-convocatorias') loadAnnouncements()
+  if (sectionId === 'section-reapplications') initMonitor()
+  if (sectionId === 'section-user-home') initUserHome()
 }
 
-// ─── Drop zone (bulk usuarios) ──────────────────────────────────────────────────
+// ─── ADMIN: Drop zone usuarios ──────────────────────────────────────────────────
 const dropZone  = document.getElementById('dropZone')
 const fileInput = document.getElementById('fileInput')
 const btnUpload = document.getElementById('btnUpload')
@@ -627,32 +811,22 @@ const btnUpload = document.getElementById('btnUpload')
 fileInput.addEventListener('change', () => setBulkFile(fileInput.files[0]))
 dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over') })
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'))
-dropZone.addEventListener('drop', e => {
-  e.preventDefault(); dropZone.classList.remove('drag-over')
-  setBulkFile(e.dataTransfer.files[0])
-})
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); setBulkFile(e.dataTransfer.files[0]) })
 function setBulkFile(f) {
   if (!f) return
   selectedBulkFile = f
   const lbl = document.getElementById('fileNameLabel')
   lbl.textContent = f.name; lbl.classList.remove('d-none')
-  dropZone.classList.add('has-file')
-  btnUpload.disabled = false
+  dropZone.classList.add('has-file'); btnUpload.disabled = false
 }
 
-// ─── Upload usuarios ────────────────────────────────────────────────────────────
 async function doUpload() {
   if (!selectedBulkFile) return
   btnUpload.disabled = true
   btnUpload.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Subiendo...'
   try {
-    const form = new FormData()
-    form.append('file', selectedBulkFile)
-    const res = await fetch(`${API}/bulk-upload`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: form,
-    })
+    const form = new FormData(); form.append('file', selectedBulkFile)
+    const res = await fetch(`${API}/bulk-upload`, { method:'POST', headers:{Authorization:`Bearer ${token}`}, body:form })
     const data = await res.json()
     if (!res.ok) throw new Error(Array.isArray(data.message) ? data.message.join(', ') : data.message)
     toast('Archivo recibido — procesando en background', 'success')
@@ -665,110 +839,80 @@ async function doUpload() {
   }
 }
 
-// ─── Modal Agregar Avance ───────────────────────────────────────────────────────
-const progressDropZone = document.getElementById('progressDropZone')
+// ─── ADMIN: Modal Avance ─────────────────────────────────────────────────────
+const progressDropZone  = document.getElementById('progressDropZone')
 const progressFileInput = document.getElementById('progressFileInput')
-
 progressFileInput.addEventListener('change', () => setProgressFile(progressFileInput.files[0]))
 progressDropZone.addEventListener('dragover',  e => { e.preventDefault(); progressDropZone.classList.add('drag-over') })
 progressDropZone.addEventListener('dragleave', () => progressDropZone.classList.remove('drag-over'))
-progressDropZone.addEventListener('drop', e => {
-  e.preventDefault(); progressDropZone.classList.remove('drag-over')
-  setProgressFile(e.dataTransfer.files[0])
-})
-
+progressDropZone.addEventListener('drop', e => { e.preventDefault(); progressDropZone.classList.remove('drag-over'); setProgressFile(e.dataTransfer.files[0]) })
 function setProgressFile(f) {
-  if (!f) return
-  progressFile = f
+  if (!f) return; progressFile = f
   const lbl = document.getElementById('progressFileLabel')
   lbl.textContent = f.name; lbl.classList.remove('d-none')
   progressDropZone.classList.add('has-file')
   document.getElementById('btnProgressUpload').disabled = false
 }
-
 function openProgressModal() {
-  progressFile = null
-  progressFileInput.value = ''
+  progressFile = null; progressFileInput.value = ''
   progressDropZone.classList.remove('has-file')
   document.getElementById('progressFileLabel').classList.add('d-none')
   document.getElementById('btnProgressUpload').disabled = true
   document.getElementById('progressAlert').className = 'd-none'
   new bootstrap.Modal(document.getElementById('modalProgress')).show()
 }
-
 async function doProgressUpload() {
   if (!progressFile) return
   const btn = document.getElementById('btnProgressUpload')
-  btn.disabled = true
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Subiendo...'
+  btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Subiendo...'
   const alertEl = document.getElementById('progressAlert')
-
   try {
-    const form = new FormData()
-    form.append('file', progressFile)
-    const res = await fetch(`${API}/bulk-progress`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: form,
-    })
+    const form = new FormData(); form.append('file', progressFile)
+    const res = await fetch(`${API}/bulk-progress`, { method:'POST', headers:{Authorization:`Bearer ${token}`}, body:form })
     const data = await res.json()
     if (res.status === 404) {
       alertEl.className = 'alert alert-warning small'
-      alertEl.innerHTML = '<i class="bi bi-cone-striped me-1"></i><strong>Endpoint en desarrollo.</strong> Esta funcionalidad estará disponible en la Fase 3.'
+      alertEl.innerHTML = '<i class="bi bi-cone-striped me-1"></i><strong>Endpoint en desarrollo.</strong> Disponible en Fase 2.'
       return
     }
     if (!res.ok) throw new Error(Array.isArray(data.message) ? data.message.join(', ') : data.message)
-    toast('Avance recibido — procesando en background', 'success')
+    toast('Avance recibido', 'success')
     bootstrap.Modal.getInstance(document.getElementById('modalProgress'))?.hide()
   } catch (e) {
-    alertEl.className = 'alert alert-danger small'
-    alertEl.textContent = e.message || 'Error al subir'
+    alertEl.className = 'alert alert-danger small'; alertEl.textContent = e.message || 'Error al subir'
   } finally {
-    btn.disabled = false
-    btn.innerHTML = '<i class="bi bi-cloud-upload me-2"></i>Subir avance'
+    btn.disabled = false; btn.innerHTML = '<i class="bi bi-cloud-upload me-2"></i>Subir avance'
   }
 }
 
-// ─── Jobs ──────────────────────────────────────────────────────────────────────
+// ─── ADMIN: Jobs ───────────────────────────────────────────────────────────────
 async function loadJobs(page = 1) {
   jobsPage = page
   const btn = document.getElementById('btnRefreshJobs')
   btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
   try {
     const { rows, metadata } = await api('GET', `/bulk-upload?page=${page}&perPage=${JOBS_PER_PAGE}`)
-    renderJobs(rows)
-    renderPag(metadata, 'jobsPagRow', 'jobsPagInfo', 'jobsPagLinks', loadJobs)
+    renderJobs(rows); renderPag(metadata, 'jobsPagRow', 'jobsPagInfo', 'jobsPagLinks', loadJobs)
   } catch {
-    document.getElementById('jobsBody').innerHTML =
-      '<tr><td colspan="8" class="text-center text-danger py-2 small">Error al cargar</td></tr>'
-  } finally {
-    btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>'
-  }
+    document.getElementById('jobsBody').innerHTML = '<tr><td colspan="8" class="text-center text-danger py-2 small">Error al cargar</td></tr>'
+  } finally { btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>' }
 }
-
 function renderJobs(rows) {
   const tb = document.getElementById('jobsBody')
-  if (!rows?.length) {
-    tb.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3 small">No hay cargues registrados</td></tr>'
-    return
-  }
-  tb.innerHTML = rows.map(j => `
-    <tr>
-      <td><i class="bi bi-file-earmark-spreadsheet text-success me-1"></i>${esc(j.archivo)}</td>
-      <td>${badgeSt(j.estado)}</td>
-      <td class="text-center">${j.total ? j.total.toLocaleString() : '—'}</td>
-      <td class="text-center ${j.insertados ? 'text-success fw-semibold' : ''}">${fmt0(j.insertados)}</td>
-      <td class="text-center ${j.omitidos  ? 'text-warning fw-semibold' : ''}">${fmt0(j.omitidos)}</td>
-      <td class="text-center ${j.errores   ? 'text-danger fw-semibold'  : ''}">${fmt0(j.errores)}</td>
-      <td class="text-muted">${fmtDate(j.creadoEn)}</td>
-      <td><button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="openTracking('${j.jobId}')">
-        <i class="bi bi-eye"></i>
-      </button></td>
-    </tr>
-  `).join('')
+  if (!rows?.length) { tb.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3 small">No hay cargues registrados</td></tr>'; return }
+  tb.innerHTML = rows.map(j => `<tr>
+    <td><i class="bi bi-file-earmark-spreadsheet text-success me-1"></i>${esc(j.archivo)}</td>
+    <td>${badgeSt(j.estado)}</td>
+    <td class="text-center">${j.total ? j.total.toLocaleString() : '—'}</td>
+    <td class="text-center ${j.insertados ? 'text-success fw-semibold' : ''}">${fmt0(j.insertados)}</td>
+    <td class="text-center ${j.omitidos  ? 'text-warning fw-semibold' : ''}">${fmt0(j.omitidos)}</td>
+    <td class="text-center ${j.errores   ? 'text-danger fw-semibold'  : ''}">${fmt0(j.errores)}</td>
+    <td class="text-muted">${fmtDate(j.creadoEn)}</td>
+    <td><button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="openTracking('${j.jobId}')"><i class="bi bi-eye"></i></button></td>
+  </tr>`).join('')
 }
 
-// ─── Tracking ──────────────────────────────────────────────────────────────────
+// ─── ADMIN: Tracking ──────────────────────────────────────────────────────────
 function openTracking(jobId) {
   stopPolling()
   document.getElementById('view-main').style.display = 'none'
@@ -780,34 +924,26 @@ function openTracking(jobId) {
   document.getElementById('tState').innerHTML = '<div class="text-muted"><span class="spinner-border spinner-border-sm"></span></div>'
   fetchJob(jobId)
 }
-
 function closeTracking() {
   stopPolling()
   document.getElementById('view-tracking').style.display = 'none'
   document.getElementById('view-main').style.display = 'block'
   selectedBulkFile = null
   document.getElementById('fileNameLabel').classList.add('d-none')
-  dropZone.classList.remove('has-file')
-  btnUpload.disabled = true
+  dropZone.classList.remove('has-file'); btnUpload.disabled = true
   btnUpload.innerHTML = '<i class="bi bi-cloud-upload me-2"></i>Cargar usuarios'
   fileInput.value = ''
 }
-
 async function fetchJob(jobId) {
   try {
     const job = await api('GET', `/bulk-upload/${jobId}`)
     renderTracking(job)
     const polling = job.estado === 'pending' || job.estado === 'processing'
-    document.getElementById('tPollingAlert').style.display = polling ? 'flex' : 'none'
-    if (polling) {
-      pollingTimer = setTimeout(() => fetchJob(jobId), 5000)
-    } else {
-      loadJobs(1)
-      loadUsers(1)
-    }
+    document.getElementById('tPollingAlert').classList.toggle('d-none', !polling)
+    if (polling) { pollingTimer = setTimeout(() => fetchJob(jobId), 5000) }
+    else { loadJobs(1); loadUsers(1) }
   } catch { toast('Error al consultar el job', 'danger') }
 }
-
 function renderTracking(job) {
   document.getElementById('tTotal').textContent = job.total ? job.total.toLocaleString() : '—'
   document.getElementById('tIns').textContent   = fmt0(job.insertados)
@@ -819,39 +955,20 @@ function renderTracking(job) {
   document.getElementById('tCompleted').textContent = job.completadoEn ? fmtDate(job.completadoEn) : '—'
   const pct = job.total > 0 ? Math.round((job.insertados / job.total) * 100) : 0
   const stateEl = document.getElementById('tState')
-  if (job.estado === 'pending') {
-    stateEl.innerHTML = `<div class="text-secondary fs-3"><i class="bi bi-hourglass-split"></i></div>
-      <p class="mt-2 mb-0 fw-semibold">En espera</p><small class="text-muted">En cola para procesar</small>`
-  } else if (job.estado === 'processing') {
-    stateEl.innerHTML = `<div class="text-primary fs-3"><i class="bi bi-arrow-repeat spin"></i></div>
-      <p class="mt-2 mb-1 fw-semibold">Procesando...</p>
-      <div class="progress mb-1"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width:${pct}%"></div></div>
-      <small class="text-muted">${job.insertados?.toLocaleString() || 0} de ${job.total?.toLocaleString() || '?'}</small>`
-  } else if (job.estado === 'done' && job.errores > 0) {
-    stateEl.innerHTML = `<div class="fs-3" style="color:#f59e0b"><i class="bi bi-exclamation-circle-fill"></i></div>
-      <p class="mt-2 mb-2 fw-semibold" style="color:#d97706">Completado con errores</p>
-      ${job.reporteErrores ? `<a href="${job.reporteErrores}" target="_blank" class="btn btn-warning btn-sm">
-        <i class="bi bi-download me-1"></i>Descargar reporte (.xlsx)
-      </a>` : ''}`
-  } else if (job.estado === 'done') {
-    stateEl.innerHTML = `<div class="text-success fs-3"><i class="bi bi-check-circle-fill"></i></div>
-      <p class="mt-2 mb-0 fw-semibold text-success">Cargue completado</p>
-      <small class="text-muted">Todos los registros procesados</small>`
-  } else if (job.estado === 'failed') {
-    stateEl.innerHTML = `<div class="text-danger fs-3"><i class="bi bi-x-circle-fill"></i></div>
-      <p class="mt-2 mb-1 fw-semibold text-danger">Fallo en el procesamiento</p>
-      <small class="text-muted">${esc(job.mensajeError || 'Error desconocido')}</small>
-      <div class="mt-2"><button class="btn btn-outline-danger btn-sm" onclick="closeTracking()">
-        <i class="bi bi-arrow-left me-1"></i>Reintentar
-      </button></div>`
-  }
+  if (job.estado === 'pending')
+    stateEl.innerHTML = `<div class="text-secondary fs-3"><i class="bi bi-hourglass-split"></i></div><p class="mt-2 mb-0 fw-semibold">En espera</p><small class="text-muted">En cola para procesar</small>`
+  else if (job.estado === 'processing')
+    stateEl.innerHTML = `<div class="text-primary fs-3"><i class="bi bi-arrow-repeat spin"></i></div><p class="mt-2 mb-1 fw-semibold">Procesando...</p><div class="progress mb-1"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width:${pct}%"></div></div><small class="text-muted">${job.insertados?.toLocaleString()||0} de ${job.total?.toLocaleString()||'?'}</small>`
+  else if (job.estado === 'done' && job.errores > 0)
+    stateEl.innerHTML = `<div class="fs-3" style="color:#f59e0b"><i class="bi bi-exclamation-circle-fill"></i></div><p class="mt-2 mb-2 fw-semibold" style="color:#d97706">Completado con errores</p>${job.reporteErrores?`<a href="${job.reporteErrores}" target="_blank" class="btn btn-warning btn-sm"><i class="bi bi-download me-1"></i>Descargar reporte (.xlsx)</a>`:''}`
+  else if (job.estado === 'done')
+    stateEl.innerHTML = `<div class="text-success fs-3"><i class="bi bi-check-circle-fill"></i></div><p class="mt-2 mb-0 fw-semibold text-success">Cargue completado</p><small class="text-muted">Todos los registros procesados</small>`
+  else if (job.estado === 'failed')
+    stateEl.innerHTML = `<div class="text-danger fs-3"><i class="bi bi-x-circle-fill"></i></div><p class="mt-2 mb-1 fw-semibold text-danger">Fallo en el procesamiento</p><small class="text-muted">${esc(job.mensajeError||'Error desconocido')}</small><div class="mt-2"><button class="btn btn-outline-danger btn-sm" onclick="closeTracking()"><i class="bi bi-arrow-left me-1"></i>Reintentar</button></div>`
 }
+function stopPolling() { if (pollingTimer) { clearTimeout(pollingTimer); pollingTimer = null } }
 
-function stopPolling() {
-  if (pollingTimer) { clearTimeout(pollingTimer); pollingTimer = null }
-}
-
-// ─── Usuarios ──────────────────────────────────────────────────────────────────
+// ─── ADMIN: Usuarios ──────────────────────────────────────────────────────────
 async function loadUsers(page = 1) {
   usersPage = page
   const search = document.getElementById('userSearch').value.trim()
@@ -859,99 +976,70 @@ async function loadUsers(page = 1) {
   if (search) url += `&search=${encodeURIComponent(search)}`
   try {
     const { rows, metadata } = await api('GET', url)
-    renderUsers(rows)
-    renderPag(metadata, 'usersPagRow', 'usersPagInfo', 'usersPagLinks', loadUsers)
+    renderUsers(rows); renderPag(metadata, 'usersPagRow', 'usersPagInfo', 'usersPagLinks', loadUsers)
   } catch {
-    document.getElementById('usersBody').innerHTML =
-      '<tr><td colspan="6" class="text-center text-danger py-2 small">Error al cargar</td></tr>'
+    document.getElementById('usersBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger py-2 small">Error al cargar</td></tr>'
   }
 }
-
 function renderUsers(rows) {
   const tb = document.getElementById('usersBody')
-  if (!rows?.length) {
-    tb.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3 small">Sin usuarios</td></tr>'
-    return
-  }
+  if (!rows?.length) { tb.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3 small">Sin usuarios</td></tr>'; return }
   tb.innerHTML = rows.map(u => {
-    const name = [u.fullName || u.firstName, u.firstLastname].filter(Boolean).join(' ') || u.email
-    const roles = (u.roles || []).map(r => `<span class="badge bg-secondary">${esc(r.name || r)}</span>`).join(' ')
+    const name = [u.fullName||u.firstName,u.firstLastname].filter(Boolean).join(' ') || u.email
+    const roles = (u.roles||[]).map(r=>`<span class="badge bg-secondary">${esc(r.name||r)}</span>`).join(' ')
     const dot = u.isActive ? '<span class="dot dot-active"></span>Activo' : '<span class="dot dot-inactive"></span>Inactivo'
     return `<tr>
       <td class="fw-medium">${esc(name)}</td>
       <td class="text-muted">${esc(u.email)}</td>
-      <td>${esc(u.identification || '—')}</td>
-      <td>${roles || '<span class="text-muted">—</span>'}</td>
+      <td>${esc(u.identification||'—')}</td>
+      <td>${roles||'<span class="text-muted">—</span>'}</td>
       <td><small>${dot}</small></td>
       <td class="text-muted">${fmtDate(u.createdAt)}</td>
     </tr>`
   }).join('')
 }
+function debounceUserSearch() { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadUsers(1), 400) }
 
-function debounceUserSearch() {
-  clearTimeout(searchTimer)
-  searchTimer = setTimeout(() => loadUsers(1), 400)
-}
-
-// ─── Convocatorias ─────────────────────────────────────────────────────────────
+// ─── ADMIN: Convocatorias ─────────────────────────────────────────────────────
 async function loadAnnouncements() {
-  document.getElementById('convBody').innerHTML =
-    '<div class="text-center text-muted py-4 small"><span class="spinner-border spinner-border-sm me-1"></span>Cargando...</div>'
+  document.getElementById('convBody').innerHTML = '<div class="text-center text-muted py-4 small"><span class="spinner-border spinner-border-sm me-1"></span>Cargando...</div>'
   try {
     allAnnouncements = await api('GET', '/announcements')
     renderAnnouncements()
   } catch {
-    document.getElementById('convBody').innerHTML =
-      '<div class="text-center text-danger small py-3">Error al cargar convocatorias</div>'
+    document.getElementById('convBody').innerHTML = '<div class="text-center text-danger small py-3">Error al cargar</div>'
   }
 }
-
 function renderAnnouncements() {
   const el = document.getElementById('convBody')
-  if (!allAnnouncements.length) {
-    el.innerHTML = '<div class="text-center text-muted small py-4">Sin convocatorias activas</div>'
-    return
-  }
+  if (!allAnnouncements.length) { el.innerHTML = '<div class="text-center text-muted small py-4">Sin convocatorias</div>'; return }
   el.innerHTML = allAnnouncements.map(c => `
-    <div class="conv-card mb-2 ${selectedConvId === c.id ? 'selected' : ''}"
-         id="conv-${c.id}" onclick="selectAnnouncement(${c.id})">
+    <div class="conv-card mb-2 ${selectedConvId===c.id?'selected':''}" id="conv-${c.id}" onclick="selectAnnouncement(${c.id})">
       <div class="d-flex justify-content-between align-items-start">
         <div class="fw-semibold" style="font-size:.88rem">${esc(c.name)}</div>
-        <span class="badge ${c.isActive ? 'bg-success' : 'bg-secondary'} ms-2" style="font-size:.65rem">
-          ${c.isActive ? 'Activa' : 'Inactiva'}
-        </span>
+        <span class="badge ${c.isActive?'bg-success':'bg-secondary'} ms-2" style="font-size:.65rem">${c.isActive?'Activa':'Inactiva'}</span>
       </div>
       <div class="conv-date-row">
-        <span class="conv-date"><i class="bi bi-calendar-check me-1"></i>Examen: <strong>${fmtDateOnly(c.examStartDate)}${c.examEndDate ? ' – ' + fmtDateOnly(c.examEndDate) : ''}</strong></span>
+        <span class="conv-date"><i class="bi bi-calendar-check me-1"></i>Examen: <strong>${fmtDateOnly(c.examStartDate)}${c.examEndDate?' – '+fmtDateOnly(c.examEndDate):''}</strong></span>
         <span class="conv-date"><i class="bi bi-arrow-repeat me-1"></i>Reaplicación: <strong>${fmtDateOnly(c.reapplicationDate)}</strong></span>
       </div>
-    </div>
-  `).join('')
+    </div>`).join('')
 }
-
 function selectAnnouncement(id) {
   selectedConvId = id
   const conv = allAnnouncements.find(c => c.id == id)
-  // Highlight selected
-  document.querySelectorAll('.conv-card').forEach(el =>
-    el.classList.toggle('selected', el.id === `conv-${id}`))
-  // Show resources panel
+  document.querySelectorAll('.conv-card').forEach(el => el.classList.toggle('selected', el.id === `conv-${id}`))
   document.getElementById('resourcesPlaceholder').style.display = 'none'
   const panel = document.getElementById('resourcesPanel')
   panel.style.display = 'block'
-  document.getElementById('resTitle').innerHTML =
-    `<i class="bi bi-folder2-open me-2 text-warning"></i>Recursos`
   document.getElementById('resSubtitle').textContent = conv ? conv.name : ''
-  // Fill milestone filter
   const sel = document.getElementById('milestoneFilter')
   sel.innerHTML = '<option value="">— Todos los hitos —</option>' +
     allMilestones.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('')
   loadResources(id)
 }
-
 async function loadResources(announcementId) {
-  document.getElementById('resList').innerHTML =
-    '<div class="text-center text-muted py-3 small"><span class="spinner-border spinner-border-sm me-1"></span>Cargando...</div>'
+  document.getElementById('resList').innerHTML = '<div class="text-center text-muted py-3 small"><span class="spinner-border spinner-border-sm me-1"></span>Cargando...</div>'
   try {
     const milId = document.getElementById('milestoneFilter').value
     let url = `/resources?announcementId=${announcementId}`
@@ -959,63 +1047,38 @@ async function loadResources(announcementId) {
     allResources = await api('GET', url)
     renderResources()
   } catch {
-    document.getElementById('resList').innerHTML =
-      '<div class="text-center text-danger small py-3">Error al cargar recursos</div>'
+    document.getElementById('resList').innerHTML = '<div class="text-center text-danger small py-3">Error al cargar</div>'
   }
 }
-
-function filterResources() {
-  if (selectedConvId) loadResources(selectedConvId)
-}
-
+function filterResources() { if (selectedConvId) loadResources(selectedConvId) }
 function renderResources() {
   const el = document.getElementById('resList')
-  if (!allResources.length) {
-    el.innerHTML = '<div class="text-center text-muted small py-4"><i class="bi bi-inbox me-1"></i>Sin recursos para esta selección</div>'
-    return
-  }
-  const milestoneName = id => {
-    const m = allMilestones.find(m => m.id == id)
-    return m ? m.name : `Hito ${id}`
-  }
+  if (!allResources.length) { el.innerHTML = '<div class="text-center text-muted small py-4"><i class="bi bi-inbox me-1"></i>Sin recursos</div>'; return }
+  const milestoneName = id => { const m = allMilestones.find(m=>m.id==id); return m ? m.name : `Hito ${id}` }
   el.innerHTML = allResources.map(r => `
     <div class="resource-row">
       <div class="resource-title">
         <a href="${esc(r.url)}" target="_blank" class="text-decoration-none">
-          <i class="bi bi-link-45deg me-1 text-primary"></i>${esc(r.title)}
+          <i class="bi bi-link-45deg me-1" style="color:var(--primary)"></i>${esc(r.title)}
         </a>
-        ${r.description ? `<div class="text-muted" style="font-size:.75rem">${esc(r.description)}</div>` : ''}
+        ${r.description?`<div class="text-muted" style="font-size:.75rem">${esc(r.description)}</div>`:''}
       </div>
-      <span class="resource-milestone">${esc(r.milestone?.name || milestoneName(r.milestoneId))}</span>
-      <button class="btn btn-sm btn-outline-secondary py-0 px-1 ms-1" onclick="openResourceModal(${JSON.stringify(r).replace(/"/g,'&quot;')})" title="Editar">
-        <i class="bi bi-pencil" style="font-size:.7rem"></i>
-      </button>
-      <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="deleteResource(${r.id})" title="Eliminar">
-        <i class="bi bi-trash" style="font-size:.7rem"></i>
-      </button>
-    </div>
-  `).join('')
+      <span class="resource-milestone">${esc(r.milestone?.name||milestoneName(r.milestoneId))}</span>
+      <button class="btn btn-sm btn-outline-secondary py-0 px-1 ms-1" onclick='openResourceModal(${JSON.stringify(r).replace(/'/g,"&#39;")})' title="Editar"><i class="bi bi-pencil" style="font-size:.7rem"></i></button>
+      <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="deleteResource(${r.id})" title="Eliminar"><i class="bi bi-trash" style="font-size:.7rem"></i></button>
+    </div>`).join('')
 }
-
-// ─── Recursos CRUD ─────────────────────────────────────────────────────────────
 function openResourceModal(resource) {
   document.getElementById('resEditId').value = resource ? resource.id : ''
   document.getElementById('resTitle2').value = resource ? resource.title : ''
   document.getElementById('resUrl').value    = resource ? resource.url : ''
-  document.getElementById('resDesc').value   = resource ? (resource.description || '') : ''
+  document.getElementById('resDesc').value   = resource ? (resource.description||'') : ''
   document.getElementById('resourceFormError').classList.add('d-none')
-  document.getElementById('resourceModalTitle').innerHTML =
-    `<i class="bi bi-link-45deg me-2 text-warning"></i>${resource ? 'Editar recurso' : 'Agregar recurso'}`
-
-  // Poblar milestones
+  document.getElementById('resourceModalTitle').innerHTML = `<i class="bi bi-link-45deg me-2 text-warning"></i>${resource?'Editar recurso':'Agregar recurso'}`
   const sel = document.getElementById('resMilestone')
-  sel.innerHTML = allMilestones.map(m =>
-    `<option value="${m.id}" ${resource && resource.milestoneId == m.id ? 'selected' : ''}>${esc(m.name)}</option>`
-  ).join('')
-
+  sel.innerHTML = allMilestones.map(m=>`<option value="${m.id}" ${resource&&resource.milestoneId==m.id?'selected':''}>${esc(m.name)}</option>`).join('')
   new bootstrap.Modal(document.getElementById('modalResource')).show()
 }
-
 async function saveResource() {
   const id    = document.getElementById('resEditId').value
   const title = document.getElementById('resTitle2').value.trim()
@@ -1023,45 +1086,277 @@ async function saveResource() {
   const desc  = document.getElementById('resDesc').value.trim()
   const milId = Number(document.getElementById('resMilestone').value)
   const errEl = document.getElementById('resourceFormError')
-
-  if (!title || !url || !milId) {
-    errEl.textContent = 'Título, URL e Hito son obligatorios'
-    errEl.classList.remove('d-none')
-    return
-  }
-
+  if (!title || !url || !milId) { errEl.textContent = 'Título, URL e Hito son obligatorios'; errEl.classList.remove('d-none'); return }
   const btn = document.getElementById('btnSaveResource')
-  btn.disabled = true
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...'
-
+  btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...'
   try {
-    const body = { title, url, description: desc || undefined, announcementId: selectedConvId, milestoneId: milId }
-    if (id) {
-      await api('PATCH', `/resources/${id}`, body)
-      toast('Recurso actualizado', 'success')
-    } else {
-      await api('POST', '/resources', body)
-      toast('Recurso creado', 'success')
-    }
+    const body = { title, url, description: desc||undefined, announcementId: selectedConvId, milestoneId: milId }
+    if (id) { await api('PATCH', `/resources/${id}`, body); toast('Recurso actualizado', 'success') }
+    else     { await api('POST', '/resources', body);       toast('Recurso creado', 'success') }
     bootstrap.Modal.getInstance(document.getElementById('modalResource'))?.hide()
     loadResources(selectedConvId)
-  } catch (e) {
-    errEl.textContent = e.message || 'Error al guardar'
-    errEl.classList.remove('d-none')
-  } finally {
-    btn.disabled = false
-    btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Guardar'
+  } catch (e) { errEl.textContent = e.message||'Error al guardar'; errEl.classList.remove('d-none') }
+  finally { btn.disabled = false; btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Guardar' }
+}
+async function deleteResource(id) {
+  if (!confirm('¿Eliminar este recurso?')) return
+  try { await api('DELETE', `/resources/${id}`); toast('Recurso eliminado', 'success'); loadResources(selectedConvId) }
+  catch (e) { toast(e.message||'Error al eliminar', 'danger') }
+}
+
+// ─── VIEWER: Monitor de incidencias ───────────────────────────────────────────
+async function initMonitor() {
+  // Llenar select de procesos
+  const sel = document.getElementById('monitorProcess')
+  if (allAnnouncements.length) {
+    sel.innerHTML = '<option value="">Todos los procesos</option>' +
+      allAnnouncements.map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join('')
+  }
+  loadMonitor()
+}
+async function loadMonitor() {
+  const aid   = document.getElementById('monitorProcess').value
+  const from  = document.getElementById('monitorFrom').value
+  const to    = document.getElementById('monitorTo').value
+  let url = '/reapplications?'
+  if (aid)  url += `announcementId=${aid}&`
+  if (from) url += `fromDate=${from}&`
+  if (to)   url += `toDate=${to}&`
+
+  document.getElementById('monitorBody').innerHTML =
+    '<tr><td colspan="5" class="text-center text-muted py-4"><span class="spinner-border spinner-border-sm me-1"></span>Cargando...</td></tr>'
+  try {
+    const rows = await api('GET', url)
+    renderMonitor(rows)
+  } catch {
+    document.getElementById('monitorBody').innerHTML =
+      '<tr><td colspan="5" class="text-center text-danger py-3 small">Error al cargar incidencias</td></tr>'
+  }
+}
+function renderMonitor(rows) {
+  const tb = document.getElementById('monitorBody')
+  if (!rows?.length) {
+    tb.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4 small"><i class="bi bi-inbox me-1"></i>Sin incidencias registradas</td></tr>'
+    return
+  }
+  tb.innerHTML = rows.map(r => {
+    const fullName  = [r.user?.firstName, r.user?.firstLastname].filter(Boolean).join(' ') || '—'
+    const folio     = `#${String(r.id).padStart(6,'0')}`
+    const evidencia = r.documentUrl
+      ? `<a href="${esc(r.documentUrl)}" target="_blank" class="text-decoration-none small fw-medium" style="color:var(--primary)"><i class="bi bi-file-earmark-text me-1"></i>Ver Documento</a>`
+      : '<span class="text-muted small">N/A</span>'
+    return `<tr class="monitor-row">
+      <td class="text-muted">${fmtDate(r.createdAt)}</td>
+      <td><span class="badge bg-light text-dark border" style="font-size:.72rem;white-space:normal">${esc(r.announcement?.name||'—')}</span></td>
+      <td>
+        <div class="participant-block">
+          <div class="participant-name">${esc(fullName)}</div>
+          <div class="participant-meta">ID: ${esc(r.user?.identification||'—')}</div>
+          <div class="participant-meta">Folio: ${folio}</div>
+        </div>
+      </td>
+      <td>
+        <div class="incidencia-title">${esc(r.incidencia)}</div>
+        <div class="text-muted" style="font-size:.78rem;margin-top:2px">${esc(r.description)}</div>
+      </td>
+      <td>${evidencia}</td>
+    </tr>`
+  }).join('')
+}
+async function downloadMonitorCsv() {
+  const aid  = document.getElementById('monitorProcess').value
+  const from = document.getElementById('monitorFrom').value
+  const to   = document.getElementById('monitorTo').value
+  let url = `${API}/reapplications/csv?`
+  if (aid)  url += `announcementId=${aid}&`
+  if (from) url += `fromDate=${from}&`
+  if (to)   url += `toDate=${to}&`
+  const a = document.createElement('a')
+  // Fetch con auth para obtener el CSV
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+  if (!res.ok) { toast('Error al descargar', 'danger'); return }
+  const blob = await res.blob()
+  a.href = URL.createObjectURL(blob)
+  a.download = 'solicitudes.csv'
+  a.click()
+}
+
+// ─── USUARIO: Tu Avance ───────────────────────────────────────────────────────
+async function initUserHome() {
+  // Llenar select de convocatoria en el form de reaplicación
+  const sel = document.getElementById('reapConv')
+  if (allAnnouncements.length) {
+    sel.innerHTML = allAnnouncements.map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join('')
+  }
+  renderMilestoneTimeline()
+  loadMyReapplications()
+}
+
+function renderMilestoneTimeline() {
+  const conv = allAnnouncements[0]
+  if (conv) {
+    document.getElementById('userConvName').textContent = conv.name
+  }
+  if (!allMilestones.length) return
+
+  // Mock progress: primeros 3 done, resto pending (para la demo)
+  const doneCount = 3
+  const tl = document.getElementById('milestoneTimeline')
+  const shortLabels = {
+    preparation: 'Preparación',
+    registration_simulation: 'Inscripción y Simulación',
+    application: 'Aplicación',
+    reapplication_request: 'Reaplicación',
+    certificate_upload: 'Constancia',
+    certificate_result: 'Resultados',
+  }
+  tl.innerHTML = allMilestones.map((m, i) => {
+    const done   = i < doneCount
+    const active = i === doneCount
+    const cls    = done ? 'done' : (active ? 'active' : '')
+    const icon   = done ? '<i class="bi bi-check-lg"></i>' : (active ? `<span style="font-size:.7rem">${i+1}</span>` : `<span style="font-size:.7rem;color:#d1d5db">${i+1}</span>`)
+    const dateStr = done ? fmtDateOnly(allAnnouncements[0]?.examStartDate || new Date()) : 'Pendiente'
+    return `<div class="tl-step ${cls}">
+      <div class="tl-circle">${icon}</div>
+      <div class="tl-label">${esc(shortLabels[m.key]||m.name)}</div>
+      <div class="tl-date">${dateStr}</div>
+      <button class="tl-resource-btn ${active?'active-resource':''}" onclick="selectMilestonePanel(${m.id},'${esc(m.name)}')">
+        ${active ? '<i class="bi bi-file-earmark-text"></i> ' : '<i class="bi bi-question-circle"></i> '}RECURSOS
+      </button>
+    </div>`
+  }).join('')
+
+  // Mostrar panel del hito activo por defecto
+  if (allMilestones[doneCount]) {
+    selectMilestonePanel(allMilestones[doneCount].id, allMilestones[doneCount].name)
   }
 }
 
-async function deleteResource(id) {
-  if (!confirm('¿Eliminar este recurso?')) return
+async function selectMilestonePanel(milestoneId, milestoneName) {
+  selectedMilestoneId = milestoneId
+  document.getElementById('panelMilestoneName').textContent = `Recursos: ${milestoneName}`
+  // Actualizar botón activo
+  document.querySelectorAll('.tl-resource-btn').forEach(btn => btn.classList.remove('active-resource'))
+  document.getElementById('panelResourcesList').innerHTML =
+    '<span class="spinner-border spinner-border-sm me-1"></span>Cargando...'
+
+  if (!allAnnouncements.length) {
+    document.getElementById('panelResourcesList').textContent = 'No hay convocatoria asignada.'
+    return
+  }
   try {
-    await api('DELETE', `/resources/${id}`)
-    toast('Recurso eliminado', 'success')
-    loadResources(selectedConvId)
+    const resources = await api('GET', `/resources?announcementId=${allAnnouncements[0].id}&milestoneId=${milestoneId}`)
+    if (!resources.length) {
+      document.getElementById('panelResourcesList').innerHTML =
+        '<span class="text-muted small">No hay recursos disponibles para esta fase aún.</span>'
+      return
+    }
+    document.getElementById('panelResourcesList').innerHTML = resources.map(r => `
+      <div class="resource-row mb-2">
+        <a href="${esc(r.url)}" target="_blank" class="text-decoration-none small fw-medium" style="color:var(--primary)">
+          <i class="bi bi-link-45deg me-1"></i>${esc(r.title)}
+        </a>
+        ${r.description ? `<div class="text-muted" style="font-size:.73rem">${esc(r.description)}</div>` : ''}
+      </div>`).join('')
+  } catch {
+    document.getElementById('panelResourcesList').innerHTML = '<span class="text-danger small">Error al cargar recursos</span>'
+  }
+}
+
+// Sub-navegación del usuario
+function switchUserView(view) {
+  ['avance','reaplicacion','mis-solicitudes'].forEach(v => {
+    document.getElementById(`user-view-${v}`).style.display = v === view ? 'block' : 'none'
+    const btn = document.getElementById(`btnSub${v === 'avance' ? 'Avance' : v === 'reaplicacion' ? 'Reap' : 'MisSol'}`)
+    if (btn) btn.classList.toggle('active', v === view)
+  })
+  if (view === 'mis-solicitudes') loadMyReapplications()
+}
+
+// ─── USUARIO: Reaplicación ────────────────────────────────────────────────────
+const reapDropZone = document.getElementById('reapDropZone')
+const reapFileInput = document.getElementById('reapFile')
+reapFileInput.addEventListener('change', () => setReapFile(reapFileInput.files[0]))
+reapDropZone.addEventListener('dragover',  e => { e.preventDefault(); reapDropZone.classList.add('drag-over') })
+reapDropZone.addEventListener('dragleave', () => reapDropZone.classList.remove('drag-over'))
+reapDropZone.addEventListener('drop', e => { e.preventDefault(); reapDropZone.classList.remove('drag-over'); setReapFile(e.dataTransfer.files[0]) })
+function setReapFile(f) {
+  if (!f) return; reapFile = f
+  const lbl = document.getElementById('reapFileName')
+  lbl.textContent = f.name; lbl.classList.remove('d-none')
+  reapDropZone.classList.add('has-file')
+}
+function updateIncInput() {
+  const val = document.getElementById('reapIncSelect').value
+  document.getElementById('reapIncCustom').classList.toggle('d-none', val !== 'otro')
+}
+async function submitReapplication() {
+  const convId = document.getElementById('reapConv').value
+  const incSel = document.getElementById('reapIncSelect').value
+  const incCustom = document.getElementById('reapIncCustom').value.trim()
+  const incidencia = incSel === 'otro' ? incCustom : incSel
+  const description = document.getElementById('reapDesc').value.trim()
+  const alertEl = document.getElementById('reapAlert')
+
+  if (!convId || !incidencia || !description) {
+    alertEl.className = 'alert alert-warning small'
+    alertEl.textContent = 'Completa todos los campos obligatorios.'
+    return
+  }
+
+  const form = new FormData()
+  form.append('announcementId', convId)
+  form.append('incidencia', incidencia)
+  form.append('description', description)
+  if (reapFile) form.append('file', reapFile)
+
+  alertEl.className = 'd-none'
+  const btn = document.querySelector('#user-view-reaplicacion button[onclick="submitReapplication()"]')
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...' }
+
+  try {
+    const res = await fetch(`${API}/reapplications`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(Array.isArray(data.message) ? data.message.join(', ') : data.message)
+    alertEl.className = 'alert alert-success small'
+    alertEl.innerHTML = `<i class="bi bi-check-circle me-1"></i>Solicitud enviada. Folio: <strong>${data.folio}</strong>`
+    document.getElementById('reapDesc').value = ''
+    document.getElementById('reapIncSelect').selectedIndex = 0
+    document.getElementById('reapIncCustom').classList.add('d-none')
+    reapFile = null; reapFileInput.value = ''
+    document.getElementById('reapFileName').classList.add('d-none')
+    reapDropZone.classList.remove('has-file')
   } catch (e) {
-    toast(e.message || 'Error al eliminar', 'danger')
+    alertEl.className = 'alert alert-danger small'
+    alertEl.textContent = e.message || 'Error al enviar'
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-send me-2"></i>Enviar solicitud' }
+  }
+}
+async function loadMyReapplications() {
+  document.getElementById('myReapBody').innerHTML =
+    '<tr><td colspan="5" class="text-center text-muted py-3"><span class="spinner-border spinner-border-sm me-1"></span>Cargando...</td></tr>'
+  try {
+    const rows = await api('GET', '/reapplications/me')
+    if (!rows.length) {
+      document.getElementById('myReapBody').innerHTML =
+        '<tr><td colspan="5" class="text-center text-muted py-3 small">Aún no tienes solicitudes enviadas.</td></tr>'
+      return
+    }
+    document.getElementById('myReapBody').innerHTML = rows.map(r => `<tr>
+      <td><code class="small">#${String(r.id).padStart(6,'0')}</code></td>
+      <td class="small">${esc(r.announcement?.name||'—')}</td>
+      <td class="small">${esc(r.incidencia)}</td>
+      <td class="text-muted small">${fmtDate(r.createdAt)}</td>
+      <td>${r.documentUrl ? `<a href="${esc(r.documentUrl)}" target="_blank" class="small" style="color:var(--primary)"><i class="bi bi-file-earmark me-1"></i>Ver</a>` : '<span class="text-muted small">N/A</span>'}</td>
+    </tr>`).join('')
+  } catch {
+    document.getElementById('myReapBody').innerHTML =
+      '<tr><td colspan="5" class="text-center text-danger py-2 small">Error al cargar</td></tr>'
   }
 }
 
@@ -1076,41 +1371,33 @@ async function api(method, path, body, withAuth = true) {
   if (!res.ok) throw new Error(Array.isArray(data.message) ? data.message[0] : data.message || 'Error')
   return data
 }
-
 function renderPag(meta, rowId, infoId, linksId, loadFn) {
   const row = document.getElementById(rowId)
   if (!meta || meta.totalItems === 0) { row.style.display = 'none'; return }
   row.style.display = 'flex'
-  const from = (meta.currentPage - 1) * meta.itemsPerPage + 1
-  const to   = Math.min(meta.currentPage * meta.itemsPerPage, meta.totalItems)
+  const from = (meta.currentPage-1)*meta.itemsPerPage+1
+  const to   = Math.min(meta.currentPage*meta.itemsPerPage, meta.totalItems)
   document.getElementById(infoId).textContent = `${from}–${to} de ${meta.totalItems}`
-  let h = `<li class="page-item ${meta.currentPage===1?'disabled':''}">
-    <a class="page-link" onclick="${loadFn.name}(${meta.currentPage-1})"><i class="bi bi-chevron-left"></i></a></li>`
-  for (let i = 1; i <= meta.totalPages; i++) {
-    h += `<li class="page-item ${i===meta.currentPage?'active':''}">
-      <a class="page-link" onclick="${loadFn.name}(${i})">${i}</a></li>`
-  }
-  h += `<li class="page-item ${meta.currentPage===meta.totalPages?'disabled':''}">
-    <a class="page-link" onclick="${loadFn.name}(${meta.currentPage+1})"><i class="bi bi-chevron-right"></i></a></li>`
+  let h = `<li class="page-item ${meta.currentPage===1?'disabled':''}"><a class="page-link" onclick="${loadFn.name}(${meta.currentPage-1})"><i class="bi bi-chevron-left"></i></a></li>`
+  for (let i=1;i<=meta.totalPages;i++)
+    h += `<li class="page-item ${i===meta.currentPage?'active':''}"><a class="page-link" onclick="${loadFn.name}(${i})">${i}</a></li>`
+  h += `<li class="page-item ${meta.currentPage===meta.totalPages?'disabled':''}"><a class="page-link" onclick="${loadFn.name}(${meta.currentPage+1})"><i class="bi bi-chevron-right"></i></a></li>`
   document.getElementById(linksId).innerHTML = h
 }
-
 function badgeSt(s) {
   const m = { pending:'secondary', processing:'primary', done:'success', failed:'danger' }
   return `<span class="badge bg-${m[s]||'secondary'}">${s}</span>`
 }
-function fmt0(n) { return n != null ? n.toLocaleString() : '0' }
+function fmt0(n) { return n!=null ? n.toLocaleString() : '0' }
 function fmtDate(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleString('es-CO',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
 }
 function fmtDateOnly(iso) {
   if (!iso) return '—'
-  return new Date(iso + 'T12:00:00').toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'})
+  return new Date(iso+'T12:00:00').toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'})
 }
-function esc(s) {
-  return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-}
+function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
 function toast(msg, type='info') {
   const el = document.createElement('div')
   el.className = `toast align-items-center text-bg-${type} border-0 mb-2 show`
