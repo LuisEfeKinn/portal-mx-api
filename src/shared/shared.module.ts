@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport'
 import { MailerModule } from '@nestjs-modules/mailer'
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter'
 import { join } from 'path'
+import { MilestoneRepository } from 'src/announcement/repositories/milestone.repository'
 import { ItemRepository } from 'src/user/repositories/item.repository'
 import { ModuleRepository } from 'src/user/repositories/module.repository'
 import { RolRepository } from 'src/user/repositories/rol.repository'
@@ -16,6 +17,7 @@ import { IdentificationTypeRepository } from './repositories/identificationType.
 import { PermissionRepository } from './repositories/permission.repository'
 import { UserRepository } from './repositories/user.repository'
 import { MenuAndPermissionsSeeder } from './seeders/menuAndPermissions.seeder'
+import { MilestonesSeeder } from './seeders/milestones.seeder'
 import { RolesSeeder } from './seeders/roles.seeder'
 import { AuthService } from './services/auth.service'
 import { PasswordService } from './services/password.service'
@@ -25,15 +27,8 @@ import { JwtStrategy } from './strategies/jwt.strategy'
 import { UploadFileUseCase } from './useCase/uploadFile.useCase'
 
 @Module({
-  providers: [
-    UploadFileService,
-    S3Service,
-    UploadFileUseCase,
-  ],
-  controllers: [
-    UploadFileController,
-    HealthController,
-  ],
+  providers: [UploadFileService, S3Service, UploadFileUseCase],
+  controllers: [UploadFileController, HealthController],
 })
 export class SharedModule {
   static forRoot(): DynamicModule {
@@ -47,6 +42,9 @@ export class SharedModule {
         AuthService,
         IdentificationTypeRepository,
         PermissionRepository,
+        // Milestones
+        MilestoneRepository,
+        MilestonesSeeder,
         // Roles
         RolRepository,
         RolesSeeder,
