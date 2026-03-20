@@ -140,7 +140,10 @@ export class BulkUploadController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('No se recibió ningún archivo')
-    return this.bulkUploadUseCase.uploadReapplicationResults(announcementId, file)
+    return this.bulkUploadUseCase.uploadReapplicationResults(
+      announcementId,
+      file,
+    )
   }
 
   @Get()

@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
+import { ProgressService } from 'src/progress/services/progress.service'
 import { BulkUploadService } from '../services/bulkUpload.service'
 
 @Injectable()
 export class BulkUploadUseCase {
-  constructor(private readonly bulkUploadService: BulkUploadService) {}
+  constructor(
+    private readonly bulkUploadService: BulkUploadService,
+    private readonly progressService: ProgressService,
+  ) {}
 
   async upload(file: Express.Multer.File) {
     const job = await this.bulkUploadService.enqueue(file)
@@ -45,7 +49,7 @@ export class BulkUploadUseCase {
   }
 
   async uploadExamResults(announcementId: number, file: Express.Multer.File) {
-    const result = await this.bulkUploadService.processExamResults(
+    const result = await this.progressService.processExamResults(
       announcementId,
       file.buffer,
     )
@@ -59,7 +63,7 @@ export class BulkUploadUseCase {
     announcementId: number,
     file: Express.Multer.File,
   ) {
-    const result = await this.bulkUploadService.processReapplicationResults(
+    const result = await this.progressService.processReapplicationResults(
       announcementId,
       file.buffer,
     )
