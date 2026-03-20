@@ -14,7 +14,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
-import { FileInterceptor } from '@nestjs/platform-express'
 import {
   ApiBearerAuth,
   ApiBody,
@@ -27,31 +26,8 @@ import {
   CreateReapplicationDto,
   ReapplicationFiltersDto,
 } from '../dtos/reapplication.dto'
+import { ReapplicationUploadInterceptor } from '../interceptors/upload.interceptor'
 import { ReapplicationUseCase } from '../useCase/reapplication.useCase'
-
-const ALLOWED_MIME_TYPES = [
-  'application/pdf',
-  'image/jpeg',
-  'image/png',
-  'image/jpg',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-]
-
-const uploadInterceptor = FileInterceptor('file', {
-  limits: { fileSize: 20 * 1024 * 1024 },
-  fileFilter: (_, file, cb) => {
-    if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-      return cb(
-        new BadRequestException(
-          'Solo se permiten PDF, imágenes o documentos Word',
-        ),
-        false,
-      )
-    }
-    cb(null, true)
-  },
-})
 
 @Controller('reapplications')
 @ApiTags('Reapplications')
@@ -75,7 +51,7 @@ export class ReapplicationController {
       },
     },
   })
-  @UseInterceptors(uploadInterceptor)
+  @UseInterceptors(ReapplicationUploadInterceptor)
   async create(
     @Req() req: { user: { id: number } },
     @Body() body: {

@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { AnnouncementModule } from './announcement/announcement.module'
 import { AuthModule } from './auth/auth.module'
 import { config } from './config'
+import { ProgressModule } from './progress/progress.module'
 import { ReapplicationModule } from './reapplication/reapplication.module'
 import { SharedModule } from './shared/shared.module'
 import { UserModule } from './user/user.module'
@@ -32,6 +33,7 @@ import { UserModule } from './user/user.module'
     AuthModule,
     UserModule,
     AnnouncementModule,
+    ProgressModule,
     ReapplicationModule,
   ],
 })

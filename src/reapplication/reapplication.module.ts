@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { ProgressModule } from 'src/progress/progress.module'
 import { S3Service } from 'src/shared/services/s3.service'
 import { UploadFileService } from 'src/shared/services/uploadFile.service'
 import { SharedModule } from 'src/shared/shared.module'
@@ -8,7 +9,7 @@ import { ReapplicationService } from './services/reapplication.service'
 import { ReapplicationUseCase } from './useCase/reapplication.useCase'
 
 @Module({
-  imports: [SharedModule.forRoot()],
+  imports: [SharedModule.forRoot(), ProgressModule],
   controllers: [ReapplicationController],
   providers: [
     ReapplicationRepository,

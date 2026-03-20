@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import * as bcrypt from 'bcrypt'
+import { ProgressService } from 'src/progress/services/progress.service'
 import { BulkUploadJobEntity } from 'src/shared/entities/bulkUploadJob.entity'
 import { UserRepository } from 'src/shared/repositories/user.repository'
 import { UploadFileService } from 'src/shared/services/uploadFile.service'
@@ -25,6 +26,7 @@ export class BulkUploadService implements OnModuleInit {
     private readonly jobRepository: BulkUploadJobRepository,
     private readonly uploadFileService: UploadFileService,
     private readonly dataSource: DataSource,
+    private readonly progressService: ProgressService,
   ) {}
 
   // Al iniciar el servidor: recuperar jobs que quedaron en 'processing' por caída
@@ -310,6 +312,71 @@ export class BulkUploadService implements OnModuleInit {
       result.push(...hashed)
     }
     return result
+  }
+
+  /**
+   * Procesa un Excel con correos de quienes presentaron el examen.
+   * Marca el hito "application" como completado para cada usuario encontrado.
+   */
+  async processExamResults(
+    announcementId: number,
+    buffer: Buffer,
+  ): Promise<{ procesados: number; noEncontrados: number }> {
+    const emails = this.parseEmailList(buffer)
+    return await this.markMilestoneForEmails(emails, announcementId, 'application')
+  }
+
+  /**
+   * Procesa un Excel con correos de reaplicantes que presentaron el examen.
+   * Marca el hito "certificate_upload" como completado para cada usuario encontrado.
+   */
+  async processReapplicationResults(
+    announcementId: number,
+    buffer: Buffer,
+  ): Promise<{ procesados: number; noEncontrados: number }> {
+    const emails = this.parseEmailList(buffer)
+    return await this.markMilestoneForEmails(
+      emails,
+      announcementId,
+      'certificate_upload',
+    )
+  }
+
+  private parseEmailList(buffer: Buffer): string[] {
+    const workbook = xlsx.read(buffer, { type: 'buffer' })
+    const sheet = workbook.Sheets[workbook.SheetNames[0]]
+    const rows = xlsx.utils.sheet_to_json<{ correo?: string }>(sheet, {
+      defval: '',
+    })
+    return rows
+      .map((r) => r.correo?.toString().trim().toLowerCase())
+      .filter((e): e is string => !!e)
+  }
+
+  private async markMilestoneForEmails(
+    emails: string[],
+    announcementId: number,
+    milestoneKey: string,
+  ): Promise<{ procesados: number; noEncontrados: number }> {
+    if (!emails.length) return { procesados: 0, noEncontrados: 0 }
+
+    const found = await this.userRepository
+      .createQueryBuilder('u')
+      .select('u.id')
+      .where('u.email IN (:...emails)', { emails })
+      .getMany()
+
+    const userIds = found.map((u) => Number(u.id))
+    await this.progressService.markMilestoneByKeyBulk(
+      userIds,
+      announcementId,
+      milestoneKey,
+    )
+
+    return {
+      procesados: userIds.length,
+      noEncontrados: emails.length - userIds.length,
+    }
   }
 
   private async uploadErrorReport(

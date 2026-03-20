@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { ProgressModule } from 'src/progress/progress.module'
 import { UserRepository } from 'src/shared/repositories/user.repository'
 import { PaginatedService } from 'src/shared/services/paginated.service'
 import { S3Service } from 'src/shared/services/s3.service'
@@ -25,7 +26,7 @@ import { RoleUseCase } from './useCase/role.useCase'
 import { CrudUsersUseCase } from './useCase/user.useCase'
 
 @Module({
-  imports: [SharedModule.forRoot()],
+  imports: [SharedModule.forRoot(), ProgressModule],
   providers: [
     CrudUserService,
     InitDataService,

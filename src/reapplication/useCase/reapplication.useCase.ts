@@ -1,4 +1,5 @@
 import { Injectable, StreamableFile } from '@nestjs/common'
+import { ProgressService } from 'src/progress/services/progress.service'
 import {
   CreateReapplicationDto,
   ReapplicationFiltersDto,
@@ -7,14 +8,23 @@ import { ReapplicationService } from '../services/reapplication.service'
 
 @Injectable()
 export class ReapplicationUseCase {
-  constructor(private readonly service: ReapplicationService) {}
+  constructor(
+    private readonly service: ReapplicationService,
+    private readonly progressService: ProgressService,
+  ) {}
 
-  create(
+  async create(
     userId: number,
     dto: CreateReapplicationDto,
     file?: Express.Multer.File,
   ) {
-    return this.service.create(userId, dto, file)
+    const result = await this.service.create(userId, dto, file)
+    await this.progressService.markMilestoneByKey(
+      userId,
+      dto.announcementId,
+      'reapplication_request',
+    )
+    return result
   }
 
   async findAll(filters: ReapplicationFiltersDto) {

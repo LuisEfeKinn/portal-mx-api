@@ -44,6 +44,31 @@ export class BulkUploadUseCase {
     }
   }
 
+  async uploadExamResults(announcementId: number, file: Express.Multer.File) {
+    const result = await this.bulkUploadService.processExamResults(
+      announcementId,
+      file.buffer,
+    )
+    return {
+      mensaje: 'Resultados de examen procesados correctamente.',
+      ...result,
+    }
+  }
+
+  async uploadReapplicationResults(
+    announcementId: number,
+    file: Express.Multer.File,
+  ) {
+    const result = await this.bulkUploadService.processReapplicationResults(
+      announcementId,
+      file.buffer,
+    )
+    return {
+      mensaje: 'Resultados de reaplicación procesados correctamente.',
+      ...result,
+    }
+  }
+
   async status(jobId: string) {
     const job = await this.bulkUploadService.getJob(jobId)
     if (!job) throw new NotFoundException('Job no encontrado')

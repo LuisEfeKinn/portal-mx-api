@@ -381,7 +381,7 @@
             </div>
           </div>
           <div class="ms-auto d-flex gap-2">
-            <button class="btn btn-outline-secondary btn-sm" onclick="loadMonitor()">
+            <button class="btn btn-outline-secondary btn-sm" onclick="loadMonitor(1)">
               <i class="bi bi-arrow-clockwise me-1"></i>Actualizar Datos
             </button>
             <button class="btn btn-sm text-white" style="background:var(--primary)" onclick="downloadMonitorCsv()">
@@ -391,20 +391,23 @@
         </div>
 
         <!-- Filtros -->
-        <div class="row g-2 mb-4">
-          <div class="col-md-5">
+        <div class="row g-2 mb-3">
+          <div class="col-md-4">
             <label class="form-label small fw-medium">Filtrar por Proceso</label>
-            <select id="monitorProcess" class="form-select form-select-sm" onchange="loadMonitor()">
+            <select id="monitorProcess" class="form-select form-select-sm" onchange="loadMonitor(1)">
               <option value="">Todos los procesos</option>
             </select>
           </div>
           <div class="col-md-3">
             <label class="form-label small fw-medium">Desde Fecha</label>
-            <input type="date" id="monitorFrom" class="form-control form-control-sm" onchange="loadMonitor()" />
+            <input type="date" id="monitorFrom" class="form-control form-control-sm" onchange="loadMonitor(1)" />
           </div>
           <div class="col-md-3">
             <label class="form-label small fw-medium">Hasta Fecha</label>
-            <input type="date" id="monitorTo" class="form-control form-control-sm" onchange="loadMonitor()" />
+            <input type="date" id="monitorTo" class="form-control form-control-sm" onchange="loadMonitor(1)" />
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <input type="text" id="monitorSearch" class="form-control form-control-sm" placeholder="Buscar..." oninput="loadMonitor(1)" />
           </div>
         </div>
 
@@ -426,6 +429,11 @@
               </td></tr>
             </tbody>
           </table>
+        </div>
+        <!-- Paginación monitor -->
+        <div id="monitorPagination" class="d-flex justify-content-between align-items-center mt-3" style="display:none!important">
+          <small class="text-muted" id="monitorMeta"></small>
+          <div id="monitorPages" class="d-flex gap-1"></div>
         </div>
       </div>
     </div>
@@ -1106,28 +1114,30 @@ async function deleteResource(id) {
 
 // ─── VIEWER: Monitor de incidencias ───────────────────────────────────────────
 async function initMonitor() {
-  // Llenar select de procesos
   const sel = document.getElementById('monitorProcess')
   if (allAnnouncements.length) {
     sel.innerHTML = '<option value="">Todos los procesos</option>' +
       allAnnouncements.map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join('')
   }
-  loadMonitor()
+  loadMonitor(1)
 }
-async function loadMonitor() {
-  const aid   = document.getElementById('monitorProcess').value
-  const from  = document.getElementById('monitorFrom').value
-  const to    = document.getElementById('monitorTo').value
-  let url = '/reapplications?'
-  if (aid)  url += `announcementId=${aid}&`
-  if (from) url += `fromDate=${from}&`
-  if (to)   url += `toDate=${to}&`
+async function loadMonitor(page = 1) {
+  const aid    = document.getElementById('monitorProcess').value
+  const from   = document.getElementById('monitorFrom').value
+  const to     = document.getElementById('monitorTo').value
+  const search = document.getElementById('monitorSearch').value
+  const params = new URLSearchParams({ page, perPage: 15 })
+  if (aid)    params.set('announcementId', aid)
+  if (from)   params.set('fromDate', from)
+  if (to)     params.set('toDate', to)
+  if (search) params.set('search', search)
 
   document.getElementById('monitorBody').innerHTML =
     '<tr><td colspan="5" class="text-center text-muted py-4"><span class="spinner-border spinner-border-sm me-1"></span>Cargando...</td></tr>'
   try {
-    const rows = await api('GET', url)
-    renderMonitor(rows)
+    const data = await api('GET', `/reapplications?${params}`)
+    renderMonitor(data.rows)
+    renderMonitorPagination(data.metadata, page)
   } catch {
     document.getElementById('monitorBody').innerHTML =
       '<tr><td colspan="5" class="text-center text-danger py-3 small">Error al cargar incidencias</td></tr>'
@@ -1140,19 +1150,17 @@ function renderMonitor(rows) {
     return
   }
   tb.innerHTML = rows.map(r => {
-    const fullName  = [r.user?.firstName, r.user?.firstLastname].filter(Boolean).join(' ') || '—'
-    const folio     = `#${String(r.id).padStart(6,'0')}`
-    const evidencia = r.documentUrl
-      ? `<a href="${esc(r.documentUrl)}" target="_blank" class="text-decoration-none small fw-medium" style="color:var(--primary)"><i class="bi bi-file-earmark-text me-1"></i>Ver Documento</a>`
+    const evidencia = r.documento
+      ? `<a href="${esc(r.documento)}" target="_blank" class="text-decoration-none small fw-medium" style="color:var(--primary)"><i class="bi bi-file-earmark-text me-1"></i>Ver</a>`
       : '<span class="text-muted small">N/A</span>'
     return `<tr class="monitor-row">
-      <td class="text-muted">${fmtDate(r.createdAt)}</td>
-      <td><span class="badge bg-light text-dark border" style="font-size:.72rem;white-space:normal">${esc(r.announcement?.name||'—')}</span></td>
+      <td class="text-muted">${fmtDate(r.fecha)}</td>
+      <td><span class="badge bg-light text-dark border" style="font-size:.72rem;white-space:normal">${esc(r.proceso||'—')}</span></td>
       <td>
         <div class="participant-block">
-          <div class="participant-name">${esc(fullName)}</div>
-          <div class="participant-meta">ID: ${esc(r.user?.identification||'—')}</div>
-          <div class="participant-meta">Folio: ${folio}</div>
+          <div class="participant-name">${esc(r.nombre||'—')}</div>
+          <div class="participant-meta">ID: ${esc(r.identificacion||'—')}</div>
+          <div class="participant-meta">Folio: ${esc(r.folio)}</div>
         </div>
       </td>
       <td>
@@ -1163,19 +1171,37 @@ function renderMonitor(rows) {
     </tr>`
   }).join('')
 }
+function renderMonitorPagination(meta, currentPage) {
+  const wrap = document.getElementById('monitorPagination')
+  if (!meta || meta.totalPages <= 1) { wrap.style.display = 'none'; return }
+  wrap.style.display = 'flex'
+  document.getElementById('monitorMeta').textContent =
+    `${meta.totalItems} registros · página ${meta.currentPage} de ${meta.totalPages}`
+  const pages = document.getElementById('monitorPages')
+  pages.innerHTML = ''
+  for (let p = 1; p <= meta.totalPages; p++) {
+    const btn = document.createElement('button')
+    btn.className = `btn btn-sm ${p === currentPage ? 'btn-primary' : 'btn-outline-secondary'}`
+    btn.style.cssText = p === currentPage ? 'background:var(--primary);border-color:var(--primary)' : ''
+    btn.textContent = p
+    btn.onclick = () => loadMonitor(p)
+    pages.appendChild(btn)
+  }
+}
 async function downloadMonitorCsv() {
-  const aid  = document.getElementById('monitorProcess').value
-  const from = document.getElementById('monitorFrom').value
-  const to   = document.getElementById('monitorTo').value
-  let url = `${API}/reapplications/csv?`
-  if (aid)  url += `announcementId=${aid}&`
-  if (from) url += `fromDate=${from}&`
-  if (to)   url += `toDate=${to}&`
-  const a = document.createElement('a')
-  // Fetch con auth para obtener el CSV
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+  const aid    = document.getElementById('monitorProcess').value
+  const from   = document.getElementById('monitorFrom').value
+  const to     = document.getElementById('monitorTo').value
+  const search = document.getElementById('monitorSearch').value
+  const params = new URLSearchParams({ format: 'csv' })
+  if (aid)    params.set('announcementId', aid)
+  if (from)   params.set('fromDate', from)
+  if (to)     params.set('toDate', to)
+  if (search) params.set('search', search)
+  const res = await fetch(`${API}/reapplications?${params}`, { headers: { Authorization: `Bearer ${token}` } })
   if (!res.ok) { toast('Error al descargar', 'danger'); return }
   const blob = await res.blob()
+  const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
   a.download = 'solicitudes.csv'
   a.click()

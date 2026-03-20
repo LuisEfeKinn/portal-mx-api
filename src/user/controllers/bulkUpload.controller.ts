@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Query,
   UploadedFile,
@@ -62,6 +63,84 @@ export class BulkUploadController {
   upload(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('No se recibió ningún archivo')
     return this.bulkUploadUseCase.upload(file)
+  }
+
+  @Post('exam-results')
+  @ApiOperation({
+    summary: 'Cargar resultados de examen',
+    description:
+      'Sube un Excel con la columna "correo" de los aplicantes que presentaron la prueba. Marca el hito de Aplicación como completado para cada usuario encontrado.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 50 * 1024 * 1024 },
+      fileFilter: (_, file, cb) => {
+        const allowed = [
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.ms-excel',
+        ]
+        if (!allowed.includes(file.mimetype)) {
+          return cb(
+            new BadRequestException('Solo se permiten archivos .xlsx o .xls'),
+            false,
+          )
+        }
+        cb(null, true)
+      },
+    }),
+  )
+  uploadExamResults(
+    @Query('announcementId', ParseIntPipe) announcementId: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('No se recibió ningún archivo')
+    return this.bulkUploadUseCase.uploadExamResults(announcementId, file)
+  }
+
+  @Post('reapplication-results')
+  @ApiOperation({
+    summary: 'Cargar resultados de reaplicación',
+    description:
+      'Sube un Excel con la columna "correo" de los reaplicantes que presentaron la prueba. Marca el hito de Reaplicación como completado para cada usuario encontrado.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 50 * 1024 * 1024 },
+      fileFilter: (_, file, cb) => {
+        const allowed = [
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.ms-excel',
+        ]
+        if (!allowed.includes(file.mimetype)) {
+          return cb(
+            new BadRequestException('Solo se permiten archivos .xlsx o .xls'),
+            false,
+          )
+        }
+        cb(null, true)
+      },
+    }),
+  )
+  uploadReapplicationResults(
+    @Query('announcementId', ParseIntPipe) announcementId: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('No se recibió ningún archivo')
+    return this.bulkUploadUseCase.uploadReapplicationResults(announcementId, file)
   }
 
   @Get()
